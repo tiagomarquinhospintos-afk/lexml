@@ -8,7 +8,6 @@ import { SlButton, SlInput } from '@shoelace-style/shoelace';
 import { html, LitElement, TemplateResult } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
 import { connect } from 'pwa-helpers';
-import { CmdEmdUtil } from '../../emenda/comando-emenda-util';
 import { adicionarAlerta } from '../../model/alerta/acao/adicionarAlerta';
 import { removerAlerta } from '../../model/alerta/acao/removerAlerta';
 import { ClassificacaoDocumento } from '../../model/documento/classificacao';
@@ -1327,25 +1326,6 @@ export class EditorComponent extends connect(rootStore)(LitElement) {
     }
   }
 
-  private alertaGlobalVerificaRenumeracao(): void {
-    const idAlerta = 'alerta-global-renumeracao';
-    const dispositivos = CmdEmdUtil.getDispositivosAdicionados(rootStore.getState().elementoReducer.articulacao);
-
-    if (dispositivos.length && CmdEmdUtil.verificaNecessidadeRenumeracaoRedacaoFinal(dispositivos)) {
-      const alerta = {
-        id: idAlerta,
-        tipo: TipoMensagem.WARNING,
-        mensagem:
-          'Os rótulos apresentados servem apenas para o posicionamento correto do novo dispositivo no texto. Serão feitas as renumerações necessárias no momento da consolidação das emendas.',
-        podeFechar: true,
-      };
-
-      rootStore.dispatch(adicionarAlerta(alerta));
-    } else {
-      rootStore.dispatch(removerAlerta(idAlerta));
-    }
-  }
-
   private alertaGlobalRevisao(): void {
     const id = 'alerta-global-revisao';
     const revisoesElementos = document.getElementsByClassName('blot__revisao');
@@ -1388,10 +1368,6 @@ export class EditorComponent extends connect(rootStore)(LitElement) {
         },
       })
     );
-
-    if (this.eventosOnChange?.length && (this.eventosOnChange.includes(StateType.ElementoIncluido) || this.eventosOnChange.includes(StateType.ElementoRemovido))) {
-      this.alertaGlobalVerificaRenumeracao();
-    }
 
     this.alertaGlobalRevisao();
     this.eventosOnChange = [];

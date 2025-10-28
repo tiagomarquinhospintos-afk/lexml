@@ -14,13 +14,5 @@ export function NumeracaoIndisponivel<TBase extends Constructor>(Base: TBase): a
     createNumeroFromRotulo(): void {
       //
     }
-
-    getNumeracaoParaComandoEmenda(): string {
-      return '';
-    }
-
-    getNumeracaoComRotuloParaComandoEmenda(): string {
-      return '';
-    }
   };
 }

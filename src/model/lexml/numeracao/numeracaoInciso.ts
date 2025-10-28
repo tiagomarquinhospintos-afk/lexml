@@ -49,19 +49,5 @@ export function NumeracaoInciso<TBase extends Constructor>(Base: TBase): any {
           : trataNumeroAndComplemento(this.numero, converteNumeroArabicoParaRomano, dispositivo.isDispositivoAlteracao ? converteNumerosComplementoParaLetra : undefined) +
             this.SUFIXO;
     }
-
-    getNumeracaoParaComandoEmenda(dispositivo: Dispositivo): string {
-      if (this.numero === undefined) {
-        return '[ainda não numerado]'; // TipoDispositivo.inciso.descricao?.toLocaleLowerCase() + '';
-      }
-      return trataNumeroAndComplemento(this.numero, converteNumeroArabicoParaRomano, dispositivo.isDispositivoAlteracao ? converteNumerosComplementoParaLetra : undefined);
-    }
-
-    getNumeracaoComRotuloParaComandoEmenda(dispositivo: Dispositivo): string {
-      if (this.numero === undefined) {
-        return TipoDispositivo.inciso.descricao?.toLocaleLowerCase() + ' [ainda não numerado]';
-      }
-      return TipoDispositivo.inciso.descricao?.toLocaleLowerCase() + ' ' + this.getNumeracaoParaComandoEmenda(dispositivo);
-    }
   };
 }

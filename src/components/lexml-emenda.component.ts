@@ -14,7 +14,7 @@ import { shoelaceLightThemeStyles } from '../assets/css/shoelace.theme.light.css
 
 import { adicionarAlerta } from '../model/alerta/acao/adicionarAlerta';
 import { removerAlerta } from '../model/alerta/acao/removerAlerta';
-import { Autoria, ColegiadoApreciador, Emenda, Epigrafe, Parlamentar, RefProposicaoEmendada, OpcoesImpressao } from '../model/emenda/emenda';
+import { Autoria, ColegiadoApreciador, Emenda, Epigrafe, Parlamentar, OpcoesImpressao } from '../model/emenda/emenda';
 import { buildFakeUrn, getAno, getNumero, getSigla, getTipo } from '../model/lexml/documento/urnUtil';
 import { rootStore } from '../redux/store';
 import { ProjetoNorma } from './../model/lexml/documento/projetoNorma';
@@ -38,6 +38,7 @@ import { errorInicializarEdicaoAction } from '../model/lexml/acao/errorInicializ
 import { isHtmlSemTexto } from '../util/string-util';
 import { ConfiguracaoPaginacao } from '../model/paginacao/paginacao';
 import { TipoMensagem } from '../model/lexml/util/mensagem';
+import { Proposicao } from '../model/proposicao/proposicao';
 
 export interface DispositivoBloqueado {
   lexmlId: string;
@@ -223,23 +224,58 @@ export class LexmlEmendaComponent extends connect(rootStore)(LitElement) {
   private montarEmendaBasica(): Emenda {
     const emenda = new Emenda();
     emenda.componentes[0].urn = this.urn;
-    emenda.proposicao = this.montarProposicaoPorUrn(this.urn, this.ementa);
+    // emenda.proposicao = this.montarProposicaoPorUrn(this.urn, this.ementa);
     return emenda;
   }
 
-  private montarProposicaoPorUrn(urn: string, ementa: string): RefProposicaoEmendada {
+  private montarProposicaoPorUrn(urn: string, ementa: string): Proposicao {
+    const prop = new Proposicao();
     if (urn) {
-      return {
-        urn: urn,
-        sigla: getSigla(urn),
-        numero: getNumero(urn),
-        ano: getAno(urn),
-        ementa: ementa,
-        identificacaoTexto: this.emendarTextoSubstitutivo ? 'Substitutivo' : 'Texto inicial',
-        emendarTextoSubstitutivo: this.emendarTextoSubstitutivo,
-      };
+      prop.urn = urn;
+      prop.ementa = ementa;
+      prop.sigla = getSigla(urn);
+      prop.numero = getNumero(urn);
+      prop.ano = getAno(urn);
     }
-    return new RefProposicaoEmendada();
+    return prop;
+  }
+
+  getProposicao(): any {
+    if (!this.urn) {
+      return new Proposicao();
+    }
+
+    const proposicao = this.montarProposicaoPorUrn(this.urn, this.ementa);
+    proposicao.dataUltimaModificacao = this._lexmlData.data || undefined;
+    proposicao.projetoNorma = this._lexmlEta?.getProjetoAtualizado();
+    proposicao.justificativa = this._lexmlJustificativa.texto;
+    proposicao.notasRodape = this._lexmlJustificativa.notasRodape;
+    proposicao.autoria = this._lexmlAutoria.getAutoriaAtualizada();
+    proposicao.opcoesImpressao = this._lexmlOpcoesImpressao.opcoesImpressao;
+
+    proposicao.revisoes = this.getRevisoes();
+    proposicao.justificativaAntesRevisao = this._lexmlJustificativa.textoAntesRevisao;
+    proposicao.pendenciasPreenchimento = this.getPendenciasPreenchimentoEmenda(proposicao);
+    proposicao.epigrafe = this.getEpigrafe(proposicao.colegiadoApreciador, proposicao.urn);
+
+    proposicao.colegiadoApreciador = this._lexmlDestino!.colegiadoApreciador;
+    if (proposicao.colegiadoApreciador) proposicao.local = this.montarLocalFromColegiadoApreciador(proposicao.colegiadoApreciador);
+
+    return proposicao;
+  }
+
+  getEpigrafe(colegiadoApreciador: ColegiadoApreciador, urn: string): Epigrafe {
+    const epigrafe = new Epigrafe();
+    epigrafe.texto =
+      'EMENDA Nº         ' +
+      (colegiadoApreciador && colegiadoApreciador.tipoColegiado !== 'Plenário' && colegiadoApreciador.siglaComissao ? `- ${colegiadoApreciador.siglaComissao}` : '');
+
+    const generoProposicao = generoFromLetra(getTipo(urn).genero);
+    const inicioEpigrafe = this.emendarTextoSubstitutivo ? '(ao substitutivo ' : '(';
+
+    epigrafe.complemento = `${inicioEpigrafe}${generoProposicao.artigoDefinidoPrecedidoPreposicaoASingular.trim()} ${getSigla(urn)} ${getNumero(urn)}/${getAno(urn)})`;
+
+    return epigrafe;
   }
 
   getEmenda(): Emenda {
@@ -275,7 +311,7 @@ export class LexmlEmendaComponent extends connect(rootStore)(LitElement) {
     return emenda;
   }
 
-  private getPendenciasPreenchimentoEmenda(emenda: Emenda): string[] {
+  private getPendenciasPreenchimentoEmenda(emenda: Emenda | Proposicao): string[] {
     const pendenciasPreenchimento: Array<string> = [];
 
     // Verifica preenchimento da justificação
@@ -465,7 +501,7 @@ export class LexmlEmendaComponent extends connect(rootStore)(LitElement) {
 
   private resetaEmenda(params: LexmlEmendaParametrosEdicao): void {
     const emenda = new Emenda();
-    emenda.proposicao = this.montarProposicaoPorUrn(this.urn, params.ementa);
+    // emenda.proposicao = this.montarProposicaoPorUrn(this.urn, params.ementa);
     emenda.autoria = this.montarAutoriaPadrao(params);
     emenda.opcoesImpressao = this.montarOpcoesImpressaoPadrao(params);
     emenda.colegiadoApreciador.siglaCasaLegislativa = this.casaLegislativa;
@@ -983,7 +1019,7 @@ export class LexmlEmendaComponent extends connect(rootStore)(LitElement) {
               (nr: NotaRodape) =>
                 html`
                   <li>
-                    <input type="checkbox" idNotaRodape="${nr.id}" class="notas-checkbox" id="checkbox-${nr.id}" @change=${() => this.selecionarNotaRodape(nr.id)} />
+                    <input type="checkbox" idNotaRodape="${nr.id}" class="notas-checkbox" id="checkbox-${nr.id}" @change=${(): void => this.selecionarNotaRodape(nr.id)} />
                     <label for="checkbox-${nr.id}" class="notas-texto">${unsafeHTML(nr.texto)}</label>
                     <span class="notas-acoes">
                       <sl-button

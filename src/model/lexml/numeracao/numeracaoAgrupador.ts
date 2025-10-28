@@ -1,5 +1,4 @@
-// import { TipoDispositivo } from './../tipo/tipoDispositivo';
-import { addSpaceRegex, primeiraLetraMaiuscula, StringBuilder } from '../../../util/string-util';
+import { addSpaceRegex } from '../../../util/string-util';
 import { Dispositivo } from '../../dispositivo/dispositivo';
 import { Numeracao } from '../../dispositivo/numeracao';
 import { DescricaoSituacao } from '../../dispositivo/situacao';
@@ -13,7 +12,6 @@ import {
   converteNumerosComplementoParaLetra,
   isNumeracaoValida,
   isNumeracaoZero,
-  isRomano,
   trataNumeroAndComplemento,
 } from './numeracaoUtil';
 
@@ -84,34 +82,6 @@ export function NumeracaoAgrupador<TBase extends Constructor>(Base: TBase): any 
               ' ' +
               trataNumeroAndComplemento(this.numero, converteNumeroArabicoParaRomano, dispositivo.isDispositivoAlteracao ? converteNumerosComplementoParaLetra : undefined));
       }
-    }
-
-    setMaiusculaPrimeiraLetraDaDescricao(s: string): string {
-      const partes = s.split('-');
-      const [main, ...remaining] = partes!;
-      const palavras = main.toLocaleLowerCase().split(' ');
-
-      for (let i = 0; i < palavras.length; i++) {
-        palavras[i] = isRomano(palavras[i]) ? palavras[1].toUpperCase() : primeiraLetraMaiuscula(palavras[i]);
-      }
-
-      return palavras.join(' ') + (remaining.length > 0 ? '-' + remaining.join('') : '');
-    }
-
-    getNumeracaoParaComandoEmenda(): string {
-      if (this.numero === undefined) {
-        return '[ainda não numerado]';
-      }
-      const numeracao = this.rotulo!.trim().replace(/^.+? +/, '');
-      return numeracao.toLowerCase().startsWith('únic') ? this.setMaiusculaPrimeiraLetraDaDescricao(numeracao) : numeracao;
-    }
-
-    getNumeracaoComRotuloParaComandoEmenda(): string {
-      const sb = new StringBuilder();
-
-      sb.append(this.setMaiusculaPrimeiraLetraDaDescricao(this.rotulo!));
-
-      return sb.toString();
     }
   };
 }
