@@ -218,7 +218,6 @@ export class DemoView extends LitElement {
                 'Cria o protocolo “Não é Não”, para prevenção ao constrangimento e à violência contra a mulher e para proteção à vítima; institui o selo “Não é Não - Mulheres Seguras”; e altera a Lei nº 14.597, de 14 de junho de 2023 (Lei Geral do Esporte).',
             };
           }
-          console.log('Params', params);
           params.emendarTextoSubstitutivo = false;
           params.motivo = 'Motivo da emenda de texto livre';
           // params.casaLegislativa = 'SF';
@@ -393,7 +392,7 @@ export class DemoView extends LitElement {
             <option value="novo">Nova articulação</option>
             ${Object.keys(mapProjetosNormas)
               .filter(k => !k.startsWith('_'))
-              .map(k => html`<option value="${k}" ?selected=${k === 'mpv_905_2019'}>${k.toUpperCase().replace(/_/, ' ').replace(/_/, ', de ')}</option>`)}
+              .map(k => html`<option value="${k}" ?selected=${k === 'plp_197_2023'}>${k.toUpperCase().replace(/_/, ' ').replace(/_/, ', de ')}</option>`)}
             <option value="_codcivil_completo">Código Civil Completo</option>
             <option value="_codcivil_parcial1">Código Civil (arts. 1 a 1023)</option>
             <option value="_codcivil_parcial2">Código Civil (arts. 1 a 388)</option>
