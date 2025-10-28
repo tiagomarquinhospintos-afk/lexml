@@ -1,9 +1,8 @@
 import { Dispositivo } from '../../dispositivo/dispositivo';
 import { Numeracao } from '../../dispositivo/numeracao';
 import { isAgrupador } from '../../dispositivo/tipo';
-import { getArticulacao, isDispositivoCabecaAlteracao } from '../hierarquia/hierarquiaUtil';
+import { getArticulacao, isDispositivoCabecaAlteracao, isDispositivoAlteracao } from '../hierarquia/hierarquiaUtil';
 import { TipoDispositivo } from '../tipo/tipoDispositivo';
-import { isDispositivoAlteracao } from './../hierarquia/hierarquiaUtil';
 import { converteLetrasComplementoParaNumero, converteNumeroArabicoParaLetra, isNumeracaoValida, trataNumeroAndComplemento, formatarMilhares } from './numeracaoUtil';
 
 export function NumeracaoArtigo<TBase extends Constructor>(Base: TBase): any {
@@ -51,7 +50,7 @@ export function NumeracaoArtigo<TBase extends Constructor>(Base: TBase): any {
         this.rotulo = TipoDispositivo.artigo.descricao;
       } else if (this.numero === undefined) {
         this.rotulo = dispositivo.tipo;
-      } else if (this.numero !== undefined && !isNumeracaoValida(this.numero)) {
+      } else if (!isNumeracaoValida(this.numero)) {
         this.rotulo = this.PREFIXO + this.numero + this.SUFIXO;
       } else if (isDispositivoCabecaAlteracao(dispositivo) || (isDispositivoAlteracao(dispositivo) && isAgrupador(dispositivo.pai!) && dispositivo.pai!.filhos.length === 1)) {
         this.rotulo = this.informouArtigoUnico ? this.ARTIGO_UNICO : this.PREFIXO + this.getNumeroAndSufixoNumeracao(dispositivo);

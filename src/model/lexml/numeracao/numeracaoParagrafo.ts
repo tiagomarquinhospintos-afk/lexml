@@ -2,7 +2,7 @@ import { Dispositivo } from '../../dispositivo/dispositivo';
 import { Numeracao } from '../../dispositivo/numeracao';
 import { isParagrafo } from '../../dispositivo/tipo';
 import { TipoDispositivo } from '../tipo/tipoDispositivo';
-import { isDispositivoNovoNaNormaAlterada } from './../hierarquia/hierarquiaUtil';
+import { isDispositivoNovoNaNormaAlterada } from '../hierarquia/hierarquiaUtil';
 import { converteLetrasComplementoParaNumero, converteNumeroArabicoParaLetra, isNumeracaoValida, trataNumeroAndComplemento } from './numeracaoUtil';
 
 export function NumeracaoParagrafo<TBase extends Constructor>(Base: TBase): any {
