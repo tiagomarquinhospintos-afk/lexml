@@ -80,12 +80,10 @@ const montaParteInicial = (projetoNorma: any): any => {
 };
 
 const montaArticulacao = (projetoNorma: any): any => {
-  const articulacao = {
+  return {
     TYPE_NAME: 'br_gov_lexml__1.Articulacao',
     lXhier: buildTree(projetoNorma.articulacao, projetoNorma.articulacao),
   };
-
-  return articulacao;
 };
 
 const buildTree = (dispositivo: Dispositivo, obj: any): any => {
