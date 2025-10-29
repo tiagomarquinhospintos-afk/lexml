@@ -152,12 +152,8 @@ export class DemoView extends LitElement {
     const { sigla, numero, ano } = this.getSiglaNumeroAnoFromUrn(projetoNorma?.value?.metadado?.identificacao?.urn);
 
     const key = `${sigla.toLowerCase()}_${numero}_${ano}`;
-    let el = this.getElement(`option[value="${key}"]`);
+    const el = this.getElement(`option[value="${key}"]`);
     el ? (el.selected = true) : undefined;
-
-    el = this.getElement('#optEmenda');
-    el.disabled = false;
-    el.selected = true;
   }
 
   onChangeDocumento(): void {
@@ -203,10 +199,6 @@ export class DemoView extends LitElement {
 
           if (this.projetoNorma && Object.keys(this.projetoNorma).length > 0) {
             params.projetoNorma = this.projetoNorma;
-
-            params.isMateriaOrcamentaria = this.elLexmlEmenda.getEmentaFromProjetoNorma(this.projetoNorma).indexOf('crédito extraordinário') >= 0;
-
-            // params.urn = this.projetoNorma?.value?.metadado?.identificacao?.urn;
             //params.autoriaPadrao = { identificacao: '6335', siglaCasaLegislativa: 'SF' };
             //params.opcoesImpressaoPadrao = { imprimirBrasao: true, textoCabecalho: 'Texto Teste Dennys', tamanhoFonte: 14 };
           } else {
@@ -218,10 +210,8 @@ export class DemoView extends LitElement {
                 'Cria o protocolo “Não é Não”, para prevenção ao constrangimento e à violência contra a mulher e para proteção à vítima; institui o selo “Não é Não - Mulheres Seguras”; e altera a Lei nº 14.597, de 14 de junho de 2023 (Lei Geral do Esporte).',
             };
           }
-          params.emendarTextoSubstitutivo = false;
-          params.motivo = 'Motivo da emenda de texto livre';
           // params.casaLegislativa = 'SF';
-          this.elLexmlEmenda.inicializarEdicao(params);
+          this.elLexmlEmenda.inicializarEdicao2(params);
 
           this.atualizarProposicaoCorrente(this.projetoNorma);
           this.elLexmlEmenda.style.display = 'block';
@@ -269,14 +259,14 @@ export class DemoView extends LitElement {
       fReader.onloadend = async (e): Promise<void> => {
         if (e.target?.result) {
           const result = JSON.parse(e.target.result as string);
-          const emenda = 'emenda' in result ? result.emenda : result;
-          this.modo = emenda.modoEdicao;
-          this.projetoNorma = await this.getProjetoNormaJsonixFromEmenda(emenda);
+          const proposicao = 'emenda' in result ? result.emenda : result;
+          this.modo = 'edicao';
+          this.projetoNorma = proposicao.projetoNorma;
 
           const params = new LexmlEmendaParametrosEdicao();
           params.projetoNorma = this.projetoNorma;
-          params.emenda = emenda;
-          this.elLexmlEmenda.inicializarEdicao(params);
+          params.emenda = proposicao;
+          this.elLexmlEmenda.inicializarEdicao2(params);
 
           this.atualizarProposicaoCorrente(this.projetoNorma);
           this.atualizarSelects(this.projetoNorma);

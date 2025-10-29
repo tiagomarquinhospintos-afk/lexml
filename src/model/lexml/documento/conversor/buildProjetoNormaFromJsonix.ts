@@ -122,7 +122,9 @@ const buildDispositivoEmenta = (texto?: string): Dispositivo | undefined => {
 const buildArticulacao = (tree: any): Articulacao => {
   const articulacao = createArticulacao();
 
-  buildTree(articulacao, tree.lXhier, []);
+  console.log('articulacao', tree, articulacao);
+  const filhos = tree.lXhier ? (tree.lXhier.lXhier ? tree.lXhier.lXhier : tree.lXhier) : tree;
+  buildTree(articulacao, filhos, []);
 
   return articulacao;
 };

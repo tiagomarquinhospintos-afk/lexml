@@ -27,7 +27,7 @@ import { Revisao, RevisaoElemento } from '../model/revisao/revisao';
 import { ativarDesativarRevisaoAction } from '../model/lexml/acao/ativarDesativarRevisaoAction';
 import { StateEvent, StateType } from '../redux/state';
 import { limparRevisaoAction } from '../model/lexml/acao/limparRevisoes';
-import { buildContent, getUrn } from '../model/lexml/documento/conversor/buildProjetoNormaFromJsonix';
+import { buildContent, buildProjetoNormaFromJsonix, getUrn } from '../model/lexml/documento/conversor/buildProjetoNormaFromJsonix';
 import { generoFromLetra } from '../model/dispositivo/genero';
 import { Comissao } from './destino/comissao';
 import { SubstituicaoTermoComponent } from './substituicao-termo/substituicao-termo.component';
@@ -65,7 +65,7 @@ export class LexmlEmendaParametrosEdicao {
   ementa = '';
 
   // Indicação de matéria orçamentária. Utilizado inicalmente para definir destino de emenda a MP
-  isMateriaOrcamentaria = false;
+  isMateriaOrcamentaria = false; //TODO Remover
 
   // Texto json da proposição para emenda ou edição estruturada (modo 'emenda' ou 'edicao')
   // Obrigatório para modo 'emenda'
@@ -77,11 +77,11 @@ export class LexmlEmendaParametrosEdicao {
   dispositivosBloqueados?: (string | DispositivoBloqueado)[];
 
   // Emenda a ser aberta para edição
-  emenda?: Emenda;
+  emenda?: Emenda; //TODO Remover
 
   // Motivo de uma nova emenda de texto livre
   // Preenchido automaticamente se for informada a emenda
-  motivo = '';
+  motivo = ''; //TODO Remover
 
   // Identificação do usuário para registro de marcas de revisão
   usuario?: Usuario;
@@ -241,6 +241,7 @@ export class LexmlEmendaComponent extends connect(rootStore)(LitElement) {
   }
 
   getProposicao(): any {
+    console.log('this.urn: ', this.urn);
     if (!this.urn) {
       return new Proposicao();
     }
@@ -341,6 +342,51 @@ export class LexmlEmendaComponent extends connect(rootStore)(LitElement) {
     return revisoes;
   }
 
+  async inicializarEdicao2(params: LexmlEmendaParametrosEdicao) {
+    try {
+      this.params = params;
+      this.projetoNorma = buildProjetoNormaFromJsonix(params.projetoNorma);
+      this.inicializaProposicao(params);
+
+      this.setUsuario(params.usuario ?? rootStore.getState().elementoReducer.usuario);
+
+      this._lexmlEta!.inicializarEdicao(this.urn, params.projetoNorma, !!params.emenda, params);
+      this.casaLegislativa = this.inicializaCasaLegislativa(getSigla(this.urn), params);
+
+      this.parlamentares = await this.getParlamentares();
+
+      // if (params.emenda) {
+      //   this.setEmenda(params.emenda);
+      // } else {
+      //   this.resetaEmenda(params);
+      // }
+
+      this.atualizaListaComissoes();
+
+      this.limparAlertas();
+
+      setTimeout(this.handleResize, 0);
+
+      if (!params.emenda?.revisoes?.length) {
+        this.desativarMarcaRevisao();
+      }
+
+      this._tabsEsquerda.show('lexml-eta-emenda');
+
+      setTimeout(() => {
+        this._tabsDireita?.show('notas');
+      });
+
+      this.updateView();
+    } catch (err) {
+      console.error(err);
+      this.emitirEventoFatalError(err);
+      setTimeout(() => {
+        rootStore.dispatch(errorInicializarEdicaoAction.execute(err));
+      }, 0);
+    }
+  }
+
   async inicializarEdicao(params: LexmlEmendaParametrosEdicao) {
     try {
       this.projetoNorma = params.projetoNorma;
@@ -397,7 +443,8 @@ export class LexmlEmendaComponent extends connect(rootStore)(LitElement) {
     if (['MPV', 'PDN', 'PRN'].indexOf(siglaProposicao) > -1) {
       return 'CN';
     }
-    return (params.emenda ? params.emenda.colegiadoApreciador.siglaCasaLegislativa : params.casaLegislativa) || 'CN';
+    //TODO Mudar para proposicao
+    return (params.emenda ? params.emenda.colegiadoApreciador?.siglaCasaLegislativa : params.casaLegislativa) || 'CN';
   }
 
   private inicializaProposicao(params: LexmlEmendaParametrosEdicao): void {
@@ -405,30 +452,16 @@ export class LexmlEmendaComponent extends connect(rootStore)(LitElement) {
     this.ementa = '';
 
     if (params.proposicao) {
-      // Preferência para a proposição informada
       this.urn = buildFakeUrn(params.proposicao.sigla, params.proposicao.numero, params.proposicao.ano);
-      this.ementa = params.proposicao.ementa; // Preferência para a ementa informada
-    }
-    this.emendarTextoSubstitutivo = params.emendarTextoSubstitutivo || false;
-
-    // Se não forem informados, utilizar da Emenda
-    if (params.emenda) {
-      if (!this.urn) {
-        this.urn = params.emenda.proposicao.urn;
-      }
-      if (!this.ementa) {
-        this.ementa = params.emenda.proposicao.ementa;
-      }
-      this.emendarTextoSubstitutivo = params.emenda.proposicao.emendarTextoSubstitutivo || false;
+      this.ementa = params.proposicao.ementa;
     }
 
-    // Por último do ProjetoNorma
     if (this.projetoNorma) {
       if (!this.urn) {
-        this.urn = getUrn(this.projetoNorma);
+        this.urn = getUrn(params.projetoNorma);
       }
       if (!this.ementa) {
-        this.ementa = this.getEmentaFromProjetoNorma(this.projetoNorma);
+        this.ementa = this.getEmentaFromProjetoNorma(params.projetoNorma);
       }
     }
   }
