@@ -10,7 +10,6 @@ import { buildJsonixFromProjetoNorma } from '../model/lexml/documento/conversor/
 import { buildProjetoNormaFromJsonix } from '../model/lexml/documento/conversor/buildProjetoNormaFromJsonix';
 import { DOCUMENTO_PADRAO } from '../model/lexml/documento/modelo/documentoPadrao';
 import { DispositivosEmenda } from './../model/emenda/emenda';
-import { ProjetoNorma } from './../model/lexml/documento/projetoNorma';
 import { rootStore } from './../redux/store';
 import { LexmlEmendaConfig } from '../model/lexmlEmendaConfig';
 import { Revisao } from '../model/revisao/revisao';
@@ -35,12 +34,12 @@ export class LexmlEtaComponent extends connect(rootStore)(LitElement) {
     return this;
   }
 
-  inicializarEdicao(urn: string, projetoNorma?: ProjetoNorma, preparaAberturaEmenda = false, params?: LexmlEmendaParametrosEdicao): void {
+  inicializarEdicao(urn: string, projetoNorma?: any, params?: LexmlEmendaParametrosEdicao): void {
     this.urn = urn;
     if (projetoNorma) {
       this.projetoNorma = projetoNorma;
     }
-    this.loadProjetoNorma(preparaAberturaEmenda, params);
+    this.loadProjetoNorma(params);
     document.querySelector('lexml-eta-emenda-articulacao')!['style'].display = 'block';
   }
 
@@ -68,7 +67,7 @@ export class LexmlEtaComponent extends connect(rootStore)(LitElement) {
     this.editorComponent.atualizaAnexo(anexos);
   }
 
-  private loadProjetoNorma(preparaAberturaEmenda: boolean, params?: LexmlEmendaParametrosEdicao): void {
+  private loadProjetoNorma(params?: LexmlEmendaParametrosEdicao): void {
     if (!this.projetoNorma || !this.projetoNorma.value) {
       this.projetoNorma = DOCUMENTO_PADRAO;
     }

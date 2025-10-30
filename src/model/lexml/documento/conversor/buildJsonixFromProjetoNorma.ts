@@ -216,7 +216,7 @@ const buildContent = (dispositivo: Dispositivo): any[] => {
 
     const from = dispositivo.texto?.indexOf(m) + m.length;
 
-    if (from < dispositivo.texto.length - 1) {
+    if (from < dispositivo.texto.length) {
       const to = ocorrencias[i + 1] ? dispositivo.texto.indexOf(ocorrencias[i + 1]) : dispositivo.texto.length;
       result.push(
         dispositivo.texto

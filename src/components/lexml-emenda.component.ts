@@ -27,7 +27,7 @@ import { Revisao, RevisaoElemento } from '../model/revisao/revisao';
 import { ativarDesativarRevisaoAction } from '../model/lexml/acao/ativarDesativarRevisaoAction';
 import { StateEvent, StateType } from '../redux/state';
 import { limparRevisaoAction } from '../model/lexml/acao/limparRevisoes';
-import { buildContent, buildProjetoNormaFromJsonix, getUrn } from '../model/lexml/documento/conversor/buildProjetoNormaFromJsonix';
+import { buildContent, getUrn } from '../model/lexml/documento/conversor/buildProjetoNormaFromJsonix';
 import { generoFromLetra } from '../model/dispositivo/genero';
 import { Comissao } from './destino/comissao';
 import { SubstituicaoTermoComponent } from './substituicao-termo/substituicao-termo.component';
@@ -241,7 +241,6 @@ export class LexmlEmendaComponent extends connect(rootStore)(LitElement) {
   }
 
   getProposicao(): any {
-    console.log('this.urn: ', this.urn);
     if (!this.urn) {
       return new Proposicao();
     }
@@ -345,12 +344,12 @@ export class LexmlEmendaComponent extends connect(rootStore)(LitElement) {
   async inicializarEdicao2(params: LexmlEmendaParametrosEdicao) {
     try {
       this.params = params;
-      this.projetoNorma = buildProjetoNormaFromJsonix(params.projetoNorma);
+      this.projetoNorma = params.projetoNorma;
       this.inicializaProposicao(params);
 
       this.setUsuario(params.usuario ?? rootStore.getState().elementoReducer.usuario);
 
-      this._lexmlEta!.inicializarEdicao(this.urn, params.projetoNorma, !!params.emenda, params);
+      this._lexmlEta!.inicializarEdicao(this.urn, this.projetoNorma, params);
       this.casaLegislativa = this.inicializaCasaLegislativa(getSigla(this.urn), params);
 
       this.parlamentares = await this.getParlamentares();
@@ -400,7 +399,7 @@ export class LexmlEmendaComponent extends connect(rootStore)(LitElement) {
 
       this.setUsuario(params.usuario ?? rootStore.getState().elementoReducer.usuario);
 
-      this._lexmlEta!.inicializarEdicao(this.urn, params.projetoNorma, !!params.emenda, params);
+      this._lexmlEta!.inicializarEdicao(this.urn, params.projetoNorma, params);
 
       this.casaLegislativa = this.inicializaCasaLegislativa(getSigla(this.urn), params);
 
