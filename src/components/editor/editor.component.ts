@@ -279,7 +279,6 @@ export class EditorComponent extends connect(rootStore)(LitElement) {
       </div>
       <div id="lx-eta-buffer"><p></p></div>
       <lexml-ajuda-modal></lexml-ajuda-modal>
-      <lexml-emenda-comando-modal></lexml-emenda-comando-modal>
       <lexml-atalhos-modal></lexml-atalhos-modal>
       <lexml-sufixos-modal></lexml-sufixos-modal>
       <emenda-dividida-modal></emenda-dividida-modal>
@@ -1373,6 +1372,7 @@ export class EditorComponent extends connect(rootStore)(LitElement) {
   }
 
   private carregarArticulacao(elementos: Elemento[], isMudancaDePagina: boolean, paginacao?: Paginacao): void {
+    console.log('carregando articulacao...', elementos, isMudancaDePagina, paginacao);
     let primeiraLinhaDaPagina: EtaContainerTable | undefined;
     setTimeout(() => {
       if (!this.quill) return;
