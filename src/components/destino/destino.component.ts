@@ -1,12 +1,13 @@
 import { LitElement, html, TemplateResult } from 'lit';
 import { customElement, property, query, state } from 'lit/decorators.js';
 import { AutocompleteAsync, Option } from '../autocomplete/autocomplete-async';
-import { ColegiadoApreciador, RefProposicaoEmendada } from '../../model/emenda/emenda';
+import { ColegiadoApreciador } from '../../model/emenda/emenda';
 import { Comissao } from './comissao';
 import { rootStore } from '../../redux/store';
 import { adicionarAlerta } from '../../model/alerta/acao/adicionarAlerta';
 import { removerAlerta } from '../../model/alerta/acao/removerAlerta';
 import { TipoMensagem } from '../../model/lexml/util/mensagem';
+import { RefProposicao } from '../../model/proposicao/proposicao';
 
 @customElement('lexml-destino')
 export class DestinoComponent extends LitElement {
@@ -27,10 +28,10 @@ export class DestinoComponent extends LitElement {
   @state()
   private isErroComissaoSelecionada = false;
 
-  private _proposicao!: RefProposicaoEmendada;
+  private _proposicao!: RefProposicao;
 
-  @property({ type: RefProposicaoEmendada })
-  set proposicao(value: RefProposicaoEmendada) {
+  @property({ type: RefProposicao })
+  set proposicao(value: RefProposicao) {
     this._proposicao = value;
     this.isMPV = false;
     if (this._proposicao.sigla === 'MPV') {
@@ -48,7 +49,7 @@ export class DestinoComponent extends LitElement {
     this.requestUpdate();
   }
 
-  get proposicao(): RefProposicaoEmendada {
+  get proposicao(): RefProposicao {
     return this._proposicao;
   }
 

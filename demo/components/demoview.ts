@@ -202,14 +202,12 @@ export class DemoView extends LitElement {
             //params.autoriaPadrao = { identificacao: '6335', siglaCasaLegislativa: 'SF' };
             //params.opcoesImpressaoPadrao = { imprimirBrasao: true, textoCabecalho: 'Texto Teste Dennys', tamanhoFonte: 14 };
           } else {
-            params.proposicao = {
-              sigla: 'PL',
-              numero: '1',
-              ano: new Date().getFullYear().toString(),
-            };
+            params.sigla = 'PL';
+            params.numero = '1';
+            params.ano = new Date().getFullYear().toString();
           }
           // params.casaLegislativa = 'SF';
-          this.elLexmlEmenda.inicializarEdicao2(params);
+          this.elLexmlEmenda.inicializarEdicao(params);
 
           this.atualizarProposicaoCorrente(this.projetoNorma);
           this.elLexmlEmenda.style.display = 'block';
@@ -256,15 +254,14 @@ export class DemoView extends LitElement {
       fReader.readAsText(fileInput.files[0]);
       fReader.onloadend = async (e): Promise<void> => {
         if (e.target?.result) {
-          const result = JSON.parse(e.target.result as string);
-          const proposicao = 'emenda' in result ? result.emenda : result;
           this.modo = 'edicao';
+          const proposicao = JSON.parse(e.target.result as string);
           this.projetoNorma = proposicao.projetoNorma;
 
           const params = new LexmlEmendaParametrosEdicao();
           params.projetoNorma = this.projetoNorma;
-          params.emenda = proposicao;
-          this.elLexmlEmenda.inicializarEdicao2(params);
+          params.proposicao = proposicao;
+          this.elLexmlEmenda.inicializarEdicao(params);
 
           this.atualizarProposicaoCorrente(this.projetoNorma);
           this.atualizarSelects(this.projetoNorma);

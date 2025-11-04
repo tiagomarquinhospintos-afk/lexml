@@ -38,7 +38,7 @@ import { errorInicializarEdicaoAction } from '../model/lexml/acao/errorInicializ
 import { isHtmlSemTexto } from '../util/string-util';
 import { ConfiguracaoPaginacao } from '../model/paginacao/paginacao';
 import { TipoMensagem } from '../model/lexml/util/mensagem';
-import { Proposicao } from '../model/proposicao/proposicao';
+import { getRefProposicaoReduzida, Proposicao } from '../model/proposicao/proposicao';
 
 export interface DispositivoBloqueado {
   lexmlId: string;
@@ -52,32 +52,25 @@ type TipoCasaLegislativa = 'SF' | 'CD' | 'CN';
  * Parâmetros de inicialização de edição de documento
  */
 export class LexmlEmendaParametrosEdicao {
-  // Identificação da proposição (texto) emendado.
-  // Opcional se for informada a emenda ou o projetoNorma
-  proposicao?: {
-    sigla: string;
-    numero: string;
-    ano: string;
-  };
+  // Identificação da proposição (texto).
+  // Opcional se for informada a proposicao ou o projetoNorma
+  urn = '';
+  sigla = '';
+  numero = '';
+  ano = '';
+
+  proposicao?: Proposicao;
 
   // Indicação de matéria orçamentária. Utilizado inicalmente para definir destino de emenda a MP
-  isMateriaOrcamentaria = false; //TODO Remover
+  isMateriaOrcamentaria = false;
 
-  // Texto json da proposição para emenda ou edição estruturada (modo 'emenda' ou 'edicao')
-  // Obrigatório para modo 'emenda'
+  // Texto json da proposição para edição estruturada
   // Opcional para modo 'edicao'
   projetoNorma?: ProjetoNorma;
 
   // Lista de lexml id's de artigos bloqueados para edição.
   // Não é salvo junto com a emenda, portanto deve ser informado também ao abrir uma emenda existente.
   dispositivosBloqueados?: (string | DispositivoBloqueado)[];
-
-  // Emenda a ser aberta para edição
-  emenda?: Emenda; //TODO Remover
-
-  // Motivo de uma nova emenda de texto livre
-  // Preenchido automaticamente se for informada a emenda
-  motivo = ''; //TODO Remover
 
   // Identificação do usuário para registro de marcas de revisão
   usuario?: Usuario;
@@ -215,13 +208,6 @@ export class LexmlEmendaComponent extends connect(rootStore)(LitElement) {
     return colegiado.tipoColegiado === 'Comissão' ? 'Sala da comissão' : 'Sala das sessões';
   }
 
-  private montarEmendaBasica(): Emenda {
-    const emenda = new Emenda();
-    emenda.componentes[0].urn = this.urn;
-    // emenda.proposicao = this.montarProposicaoPorUrn(this.urn, this.ementa);
-    return emenda;
-  }
-
   private montarProposicaoPorUrn(urn: string): Proposicao {
     const prop = new Proposicao();
     if (urn) {
@@ -240,6 +226,8 @@ export class LexmlEmendaComponent extends connect(rootStore)(LitElement) {
     }
 
     this.projetoNorma = this._lexmlEta?.getProjetoAtualizado();
+
+    console.log('this.projetoNorma', this.projetoNorma);
 
     const proposicao = this.montarProposicaoPorUrn(this.urn);
     proposicao.dataUltimaModificacao = this._lexmlData.data || undefined;
@@ -275,39 +263,6 @@ export class LexmlEmendaComponent extends connect(rootStore)(LitElement) {
     return epigrafe;
   }
 
-  getEmenda(): Emenda {
-    // Para evitar erros de referência nula quando chamado antes da inicialização do componente
-    if (!this.urn) {
-      return new Emenda();
-    }
-
-    const emenda = this.montarEmendaBasica();
-    const numeroProposicao = emenda.proposicao.numero.replace(/^0+/, '');
-    emenda.justificativa = this._lexmlJustificativa.texto;
-    emenda.notasRodape = this._lexmlJustificativa.notasRodape;
-    emenda.autoria = this._lexmlAutoria.getAutoriaAtualizada();
-    emenda.data = this._lexmlData.data || undefined;
-    emenda.opcoesImpressao = this._lexmlOpcoesImpressao.opcoesImpressao;
-    emenda.colegiadoApreciador = this._lexmlDestino!.colegiadoApreciador;
-    emenda.epigrafe = new Epigrafe();
-    emenda.epigrafe.texto = 'EMENDA Nº         ';
-    if (emenda.colegiadoApreciador && emenda.colegiadoApreciador.tipoColegiado !== 'Plenário' && emenda.colegiadoApreciador.siglaComissao) {
-      emenda.epigrafe.texto += `- ${emenda.colegiadoApreciador.siglaComissao}`;
-    }
-
-    const generoProposicao = generoFromLetra(getTipo(emenda.proposicao.urn).genero);
-    const inicioEpigrafe = this.emendarTextoSubstitutivo ? '(ao substitutivo ' : '(';
-    emenda.epigrafe.complemento = `${inicioEpigrafe}${generoProposicao.artigoDefinidoPrecedidoPreposicaoASingular.trim()} ${emenda.proposicao.sigla} ${numeroProposicao}/${
-      emenda.proposicao.ano
-    })`;
-    if (emenda.colegiadoApreciador) emenda.local = this.montarLocalFromColegiadoApreciador(emenda.colegiadoApreciador);
-    emenda.revisoes = this.getRevisoes();
-    emenda.justificativaAntesRevisao = this._lexmlJustificativa.textoAntesRevisao;
-    emenda.pendenciasPreenchimento = this.getPendenciasPreenchimentoEmenda(emenda);
-
-    return emenda;
-  }
-
   private getPendenciasPreenchimentoEmenda(emenda: Emenda | Proposicao): string[] {
     const pendenciasPreenchimento: Array<string> = [];
 
@@ -338,61 +293,14 @@ export class LexmlEmendaComponent extends connect(rootStore)(LitElement) {
     return revisoes;
   }
 
-  async inicializarEdicao2(params: LexmlEmendaParametrosEdicao) {
-    try {
-      this.params = params;
-      this.projetoNorma = params.projetoNorma;
-      this.inicializaProposicao(params);
-
-      this.setUsuario(params.usuario ?? rootStore.getState().elementoReducer.usuario);
-
-      this._lexmlEta!.inicializarEdicao(this.urn, this.projetoNorma, params);
-      this.casaLegislativa = this.inicializaCasaLegislativa(getSigla(this.urn), params);
-
-      this.parlamentares = await this.getParlamentares();
-
-      // if (params.emenda) {
-      //   this.setEmenda(params.emenda);
-      // } else {
-      //   this.resetaEmenda(params);
-      // }
-
-      this.atualizaListaComissoes();
-
-      this.limparAlertas();
-
-      setTimeout(this.handleResize, 0);
-
-      if (!params.emenda?.revisoes?.length) {
-        this.desativarMarcaRevisao();
-      }
-
-      this._tabsEsquerda.show('lexml-eta-emenda');
-
-      setTimeout(() => {
-        this._tabsDireita?.show('notas');
-      });
-
-      this.updateView();
-    } catch (err) {
-      console.error(err);
-      this.emitirEventoFatalError(err);
-      setTimeout(() => {
-        rootStore.dispatch(errorInicializarEdicaoAction.execute(err));
-      }, 0);
-    }
-  }
-
   async inicializarEdicao(params: LexmlEmendaParametrosEdicao) {
     try {
       this.projetoNorma = params.projetoNorma;
-      this.isMateriaOrcamentaria = params.isMateriaOrcamentaria || (!!params.emenda && params.emenda.colegiadoApreciador.siglaComissao === 'CMO');
+      this.isMateriaOrcamentaria = params.isMateriaOrcamentaria || (!!params.proposicao && params.proposicao.colegiadoApreciador?.siglaComissao === 'CMO');
       this._lexmlDestino!.isMateriaOrcamentaria = this.isMateriaOrcamentaria;
       this.params = params;
 
       this.inicializaProposicao(params);
-
-      this.motivo = params.motivo;
 
       this.setUsuario(params.usuario ?? rootStore.getState().elementoReducer.usuario);
 
@@ -403,10 +311,10 @@ export class LexmlEmendaComponent extends connect(rootStore)(LitElement) {
       // Deve ser chamado antes do reseta emenda para garantir a autoria padrão e depois da inicialização da casaLegislativa
       this.parlamentares = await this.getParlamentares();
 
-      if (params.emenda) {
-        this.setEmenda(params.emenda);
+      if (params.proposicao) {
+        this.setProposicao(params.proposicao);
       } else {
-        this.resetaEmenda(params);
+        this.resetaProposicao(params);
       }
 
       this.atualizaListaComissoes();
@@ -415,7 +323,7 @@ export class LexmlEmendaComponent extends connect(rootStore)(LitElement) {
 
       setTimeout(this.handleResize, 0);
 
-      if (!params.emenda?.revisoes?.length) {
+      if (!params.proposicao?.revisoes?.length) {
         this.desativarMarcaRevisao();
       }
 
@@ -440,7 +348,7 @@ export class LexmlEmendaComponent extends connect(rootStore)(LitElement) {
       return 'CN';
     }
     //TODO Mudar para proposicao
-    return (params.emenda ? params.emenda.colegiadoApreciador?.siglaCasaLegislativa : params.casaLegislativa) || 'CN';
+    return (params.proposicao ? params.proposicao.colegiadoApreciador?.siglaCasaLegislativa : params.casaLegislativa) || 'CN';
   }
 
   private inicializaProposicao(params: LexmlEmendaParametrosEdicao): void {
@@ -448,12 +356,10 @@ export class LexmlEmendaComponent extends connect(rootStore)(LitElement) {
 
     if (params.proposicao) {
       this.urn = buildFakeUrn(params.proposicao.sigla, params.proposicao.numero, params.proposicao.ano);
-    }
-
-    if (this.projetoNorma) {
-      if (!this.urn) {
-        this.urn = getUrn(params.projetoNorma);
-      }
+    } else if (this.projetoNorma) {
+      this.urn = getUrn(params.projetoNorma);
+    } else {
+      this.urn = buildFakeUrn(params.sigla, params.numero, params.ano);
     }
   }
 
@@ -507,29 +413,29 @@ export class LexmlEmendaComponent extends connect(rootStore)(LitElement) {
     rootStore.dispatch(atualizarUsuarioAction.execute(usuario));
   }
 
-  private setEmenda(emenda: Emenda): void {
+  private setProposicao(proposicao: Proposicao): void {
     rootStore.dispatch(limparAlertas());
 
-    this._lexmlEta!.setDispositivosERevisoesEmenda(emenda.componentes[0].dispositivos, emenda.revisoes);
+    // this._lexmlEta!.setDispositivosERevisoesEmenda(emenda.componentes[0].dispositivos, emenda.revisoes);
 
-    this._lexmlAutoria.autoria = emenda.autoria;
+    if (proposicao.autoria) this._lexmlAutoria.autoria = proposicao.autoria;
     this._lexmlAutoria.casaLegislativa = this.casaLegislativa;
-    this._lexmlOpcoesImpressao.opcoesImpressao = emenda.opcoesImpressao;
-    this._lexmlJustificativa.setTextoAntesRevisao(emenda.justificativaAntesRevisao);
-    this._lexmlDestino!.colegiadoApreciador = emenda.colegiadoApreciador;
-    this._lexmlDestino!.proposicao = emenda.proposicao;
-    this.notasRodape = emenda.notasRodape || [];
-    this._lexmlJustificativa.setContent(emenda.justificativa, emenda.notasRodape);
-    this._lexmlData.data = emenda.data;
+    this._lexmlOpcoesImpressao.opcoesImpressao = proposicao.opcoesImpressao;
+    this._lexmlJustificativa.setTextoAntesRevisao(proposicao.justificativaAntesRevisao);
+    this._lexmlDestino!.colegiadoApreciador = proposicao.colegiadoApreciador;
+    this._lexmlDestino!.proposicao = getRefProposicaoReduzida(proposicao);
+    this.notasRodape = proposicao.notasRodape || [];
+    this._lexmlJustificativa.setContent(proposicao.justificativa, proposicao.notasRodape);
+    this._lexmlData.data = proposicao.dataUltimaModificacao;
   }
 
-  private resetaEmenda(params: LexmlEmendaParametrosEdicao): void {
-    const emenda = new Emenda();
+  private resetaProposicao(params: LexmlEmendaParametrosEdicao): void {
+    const proposicao = new Proposicao();
     // emenda.proposicao = this.montarProposicaoPorUrn(this.urn, params.ementa);
-    emenda.autoria = this.montarAutoriaPadrao(params);
-    emenda.opcoesImpressao = this.montarOpcoesImpressaoPadrao(params);
-    emenda.colegiadoApreciador.siglaCasaLegislativa = this.casaLegislativa;
-    this.setEmenda(emenda);
+    proposicao.autoria = this.montarAutoriaPadrao(params);
+    proposicao.opcoesImpressao = this.montarOpcoesImpressaoPadrao(params);
+    proposicao.colegiadoApreciador.siglaCasaLegislativa = this.casaLegislativa;
+    this.setProposicao(proposicao);
     rootStore.dispatch(limparRevisaoAction.execute());
   }
 
