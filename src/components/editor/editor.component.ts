@@ -1372,7 +1372,6 @@ export class EditorComponent extends connect(rootStore)(LitElement) {
   }
 
   private carregarArticulacao(elementos: Elemento[], isMudancaDePagina: boolean, paginacao?: Paginacao): void {
-    console.log('carregando articulacao...', elementos, isMudancaDePagina, paginacao);
     let primeiraLinhaDaPagina: EtaContainerTable | undefined;
     setTimeout(() => {
       if (!this.quill) return;
