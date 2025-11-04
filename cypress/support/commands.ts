@@ -1,5 +1,4 @@
 /// <reference types="cypress" />
-import { LexmlEmendaComponent } from '../../src';
 import { Emenda, ModoEdicaoEmenda } from '../../src/model/emenda/emenda';
 import { removeAllHtmlTags } from '../../src/util/string-util';
 
@@ -287,20 +286,6 @@ Cypress.Commands.add('checarEstadoInicialAoCriarNovaEmendaPadrao', (payload: Che
 
   // Dispositivo "ementa" deve estar "ativo"
   cy.get('div.ementa.container__elemento--ativo').should('exist');
-});
-
-Cypress.Commands.add('checarComandoEmenda', (emenda?: Emenda): void => {
-  cy.wait(tempoDeEsperaMaior).then(() => {
-    cy.get('lexml-emenda').then($lexmlEmenda => {
-      const emendaAux = emenda ?? ($lexmlEmenda[0] as LexmlEmendaComponent).getEmenda();
-      fnChecarComandoCabecalho(emendaAux);
-      fnChecarComandoCitacao(emendaAux);
-    });
-  });
-});
-
-Cypress.Commands.add('checarTextoPresenteEmComandoEmenda', (texto: string): void => {
-  cy.get('lexml-emenda lexml-emenda-comando').shadow().find('div.lexml-emenda-comando').find('div.lexml-emenda-citacaoComando').contains(texto);
 });
 
 Cypress.Commands.add('checarDadosAposAbrirEmenda', (payload: ChecarDadosAposAbrirEmendaPayloadCypress) => {
