@@ -102,19 +102,12 @@ export const getTextoArticulado = (norma: any): TextoArticulado => {
   };
 };
 
-const buildDispositivoEmenta = (texto?: string): Dispositivo | undefined => {
-  if (!texto) {
-    return;
-  }
-
+const buildDispositivoEmenta = (texto: string): Dispositivo | undefined => {
   const dispositivo = criaDispositivo(createArticulacao(), 'Ementa');
   dispositivo.pai = undefined;
   dispositivo.texto = substituiAspasRetasPorCurvas(texto);
   dispositivo.rotulo = '';
   dispositivo.id = 'ementa';
-  if (isEmendamento) {
-    dispositivo.situacao = new DispositivoOriginal();
-  }
 
   return dispositivo;
 };
@@ -122,7 +115,6 @@ const buildDispositivoEmenta = (texto?: string): Dispositivo | undefined => {
 const buildArticulacao = (tree: any): Articulacao => {
   const articulacao = createArticulacao();
 
-  console.log('articulacao', tree, articulacao);
   const filhos = tree.lXhier ? (tree.lXhier.lXhier ? tree.lXhier.lXhier : tree.lXhier) : tree;
   buildTree(articulacao, filhos, []);
 

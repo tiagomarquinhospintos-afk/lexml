@@ -1046,7 +1046,7 @@ export const getParagrafosEOmissis = (art: Artigo): Dispositivo[] => {
 };
 
 export const hasEmenta = (referencia: Dispositivo): boolean => {
-  return !!getArticulacao(referencia).projetoNorma?.ementa?.texto;
+  return !!getArticulacao(referencia).projetoNorma?.ementa;
 };
 
 export const findDispositivoByUuid2 = (dispositivo: Dispositivo, uuid2: string): Dispositivo | null => {
