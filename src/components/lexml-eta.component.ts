@@ -55,7 +55,8 @@ export class LexmlEtaComponent extends connect(rootStore)(LitElement) {
     const out = { ...this.projetoNorma };
     const articulacaoAtualizada = buildJsonixFromProjetoNorma(rootStore.getState().elementoReducer.articulacao?.projetoNorma, this.urn);
     const tipo = (out as any).value.projetoNorma.norma ? 'norma' : 'projeto';
-    (out as any).value.projetoNorma[tipo].articulacao.lXhier = articulacaoAtualizada.value.projetoNorma[tipo].articulacao;
+    (out as any).value.projetoNorma[tipo].parteInicial = articulacaoAtualizada.value.projetoNorma[tipo].parteInicial;
+    (out as any).value.projetoNorma[tipo].articulacao.lXhier = articulacaoAtualizada.value.projetoNorma[tipo].articulacao.lXhier;
     return out;
   }
 

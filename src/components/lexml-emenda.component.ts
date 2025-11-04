@@ -58,11 +58,7 @@ export class LexmlEmendaParametrosEdicao {
     sigla: string;
     numero: string;
     ano: string;
-    ementa: string;
   };
-
-  // Preenchido automaticamente se for informada a emenda ou o projetoNorma
-  ementa = '';
 
   // Indicação de matéria orçamentária. Utilizado inicalmente para definir destino de emenda a MP
   isMateriaOrcamentaria = false; //TODO Remover
@@ -113,8 +109,6 @@ export class LexmlEmendaComponent extends connect(rootStore)(LitElement) {
   @property({ type: Object }) lexmlEmendaConfig: LexmlEmendaConfig = new LexmlEmendaConfig();
 
   private urn = '';
-
-  private ementa = '';
 
   private isMateriaOrcamentaria = false;
 
@@ -228,11 +222,11 @@ export class LexmlEmendaComponent extends connect(rootStore)(LitElement) {
     return emenda;
   }
 
-  private montarProposicaoPorUrn(urn: string, ementa: string): Proposicao {
+  private montarProposicaoPorUrn(urn: string): Proposicao {
     const prop = new Proposicao();
     if (urn) {
       prop.urn = urn;
-      prop.ementa = ementa;
+      prop.ementa = this.getEmentaFromProjetoNorma(this.projetoNorma);
       prop.sigla = getSigla(urn);
       prop.numero = getNumero(urn);
       prop.ano = getAno(urn);
@@ -245,13 +239,16 @@ export class LexmlEmendaComponent extends connect(rootStore)(LitElement) {
       return new Proposicao();
     }
 
-    const proposicao = this.montarProposicaoPorUrn(this.urn, this.ementa);
+    this.projetoNorma = this._lexmlEta?.getProjetoAtualizado();
+
+    const proposicao = this.montarProposicaoPorUrn(this.urn);
     proposicao.dataUltimaModificacao = this._lexmlData.data || undefined;
-    proposicao.projetoNorma = this._lexmlEta?.getProjetoAtualizado();
+    proposicao.projetoNorma = this.projetoNorma;
     proposicao.justificativa = this._lexmlJustificativa.texto;
     proposicao.notasRodape = this._lexmlJustificativa.notasRodape;
     proposicao.autoria = this._lexmlAutoria.getAutoriaAtualizada();
     proposicao.opcoesImpressao = this._lexmlOpcoesImpressao.opcoesImpressao;
+    proposicao.ementa = this.getEmentaFromProjetoNorma(this.projetoNorma);
 
     proposicao.revisoes = this.getRevisoes();
     proposicao.justificativaAntesRevisao = this._lexmlJustificativa.textoAntesRevisao;
@@ -448,19 +445,14 @@ export class LexmlEmendaComponent extends connect(rootStore)(LitElement) {
 
   private inicializaProposicao(params: LexmlEmendaParametrosEdicao): void {
     this.urn = '';
-    this.ementa = '';
 
     if (params.proposicao) {
       this.urn = buildFakeUrn(params.proposicao.sigla, params.proposicao.numero, params.proposicao.ano);
-      this.ementa = params.proposicao.ementa;
     }
 
     if (this.projetoNorma) {
       if (!this.urn) {
         this.urn = getUrn(params.projetoNorma);
-      }
-      if (!this.ementa) {
-        this.ementa = this.getEmentaFromProjetoNorma(params.projetoNorma);
       }
     }
   }

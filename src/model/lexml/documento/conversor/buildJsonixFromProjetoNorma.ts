@@ -64,17 +64,17 @@ const montaParteInicial = (projetoNorma: any): any => {
     epigrafe: {
       TYPE_NAME: 'br_gov_lexml__1.GenInline',
       id: 'epigrafe',
-      content: projetoNorma.epigrafe,
+      content: projetoNorma.epigrafe ? buildContent(projetoNorma.epigrafe) : [],
     },
     ementa: {
       TYPE_NAME: 'br_gov_lexml__1.GenInline',
       id: 'ementa',
-      content: projetoNorma.ementa,
+      content: projetoNorma.ementa ? buildContent(projetoNorma.ementa) : [],
     },
     preambulo: {
       TYPE_NAME: 'br_gov_lexml__1.TextoType',
       id: 'preambulo',
-      p: projetoNorma.preambulo,
+      p: projetoNorma.preambulo ? buildContent(projetoNorma.preambulo) : [],
     },
   };
 };
