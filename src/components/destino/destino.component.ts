@@ -7,7 +7,7 @@ import { rootStore } from '../../redux/store';
 import { adicionarAlerta } from '../../model/alerta/acao/adicionarAlerta';
 import { removerAlerta } from '../../model/alerta/acao/removerAlerta';
 import { TipoMensagem } from '../../model/lexml/util/mensagem';
-import { RefProposicao } from '../../model/proposicao/proposicao';
+import { RefProposicaoReduzida } from '../../model/proposicao/proposicao';
 
 @customElement('lexml-destino')
 export class DestinoComponent extends LitElement {
@@ -28,10 +28,10 @@ export class DestinoComponent extends LitElement {
   @state()
   private isErroComissaoSelecionada = false;
 
-  private _proposicao!: RefProposicao;
+  private _proposicao!: RefProposicaoReduzida;
 
-  @property({ type: RefProposicao })
-  set proposicao(value: RefProposicao) {
+  @property({ type: RefProposicaoReduzida })
+  set proposicao(value: RefProposicaoReduzida) {
     this._proposicao = value;
     this.isMPV = false;
     if (this._proposicao.sigla === 'MPV') {
@@ -49,7 +49,7 @@ export class DestinoComponent extends LitElement {
     this.requestUpdate();
   }
 
-  get proposicao(): RefProposicao {
+  get proposicao(): RefProposicaoReduzida {
     return this._proposicao;
   }
 

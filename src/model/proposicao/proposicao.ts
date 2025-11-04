@@ -28,7 +28,7 @@ export class Proposicao {
   ementa = '';
 }
 
-export const getRefProposicaoReduzida = (proposicao: Proposicao): RefProposicao => {
+export const getRefProposicaoReduzida = (proposicao: Proposicao): RefProposicaoReduzida => {
   return {
     urn: proposicao.urn,
     sigla: proposicao.sigla,
@@ -43,7 +43,7 @@ export type Metadados = {
 };
 
 // Referência reduzida da proposição ----------------------------
-export class RefProposicao {
+export class RefProposicaoReduzida {
   urn = '';
   sigla = '';
   numero = '';

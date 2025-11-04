@@ -87,9 +87,6 @@ export class LexmlEmendaParametrosEdicao {
   configuracaoPaginacao?: ConfiguracaoPaginacao;
   // Casa legislativa resposavel pela apreciaçao da emenda
   casaLegislativa?: TipoCasaLegislativa;
-
-  // Indica se o texto a ser emendado é substitutivo
-  emendarTextoSubstitutivo = false;
 }
 
 @customElement('lexml-emenda')
@@ -107,9 +104,6 @@ export class LexmlEmendaComponent extends connect(rootStore)(LitElement) {
 
   private projetoNorma: any;
 
-  private motivo = '';
-
-  private params?: LexmlEmendaParametrosEdicao;
   private casaLegislativa: TipoCasaLegislativa = 'CN';
 
   private parlamentaresCarregados = false;
@@ -129,7 +123,6 @@ export class LexmlEmendaComponent extends connect(rootStore)(LitElement) {
 
   @query('lexml-substituicao-termo')
   _substituicaoTermo?: SubstituicaoTermoComponent;
-
   @query('lexml-eta-emenda')
   _lexmlEta?: LexmlEtaComponent;
   @query('#editor-texto-rico-emenda')
@@ -298,7 +291,6 @@ export class LexmlEmendaComponent extends connect(rootStore)(LitElement) {
       this.projetoNorma = params.projetoNorma;
       this.isMateriaOrcamentaria = params.isMateriaOrcamentaria || (!!params.proposicao && params.proposicao.colegiadoApreciador?.siglaComissao === 'CMO');
       this._lexmlDestino!.isMateriaOrcamentaria = this.isMateriaOrcamentaria;
-      this.params = params;
 
       this.inicializaProposicao(params);
 
