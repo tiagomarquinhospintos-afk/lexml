@@ -85,7 +85,8 @@ export class LexmlEmendaParametrosEdicao {
 
   // Configuração de paginação de dispositivos durante a edição da emenda
   configuracaoPaginacao?: ConfiguracaoPaginacao;
-  // Casa legislativa resposavel pela apreciaçao da emenda
+
+  // Casa legislativa resposavel pela apreciaçao da matéria
   casaLegislativa?: TipoCasaLegislativa;
 }
 
@@ -296,7 +297,7 @@ export class LexmlEmendaComponent extends connect(rootStore)(LitElement) {
 
       this.setUsuario(params.usuario ?? rootStore.getState().elementoReducer.usuario);
 
-      this._lexmlEta!.inicializarEdicao(this.urn, params.projetoNorma, params);
+      this._lexmlEta!.inicializarEdicao(this.urn, params);
 
       this.casaLegislativa = this.inicializaCasaLegislativa(getSigla(this.urn), params);
 
@@ -408,8 +409,6 @@ export class LexmlEmendaComponent extends connect(rootStore)(LitElement) {
   private setProposicao(proposicao: Proposicao): void {
     rootStore.dispatch(limparAlertas());
 
-    // this._lexmlEta!.setDispositivosERevisoesEmenda(emenda.componentes[0].dispositivos, emenda.revisoes);
-
     if (proposicao.autoria) this._lexmlAutoria.autoria = proposicao.autoria;
     this._lexmlAutoria.casaLegislativa = this.casaLegislativa;
     this._lexmlOpcoesImpressao.opcoesImpressao = proposicao.opcoesImpressao;
@@ -419,6 +418,7 @@ export class LexmlEmendaComponent extends connect(rootStore)(LitElement) {
     this.notasRodape = proposicao.notasRodape || [];
     this._lexmlJustificativa.setContent(proposicao.justificativa, proposicao.notasRodape);
     this._lexmlData.data = proposicao.dataUltimaModificacao;
+    this._lexmlEta!.setDispositivosERevisoesEmenda(proposicao.revisoes);
   }
 
   private resetaProposicao(params: LexmlEmendaParametrosEdicao): void {

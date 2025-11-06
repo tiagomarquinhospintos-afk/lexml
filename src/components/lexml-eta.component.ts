@@ -34,21 +34,18 @@ export class LexmlEtaComponent extends connect(rootStore)(LitElement) {
     return this;
   }
 
-  inicializarEdicao(urn: string, projetoNorma?: any, params?: LexmlEmendaParametrosEdicao): void {
+  inicializarEdicao(urn: string, params?: LexmlEmendaParametrosEdicao): void {
     this.urn = urn;
-    if (projetoNorma) {
-      this.projetoNorma = projetoNorma;
+    if (params?.projetoNorma) {
+      this.projetoNorma = params.projetoNorma;
     }
     this.loadProjetoNorma(params);
     document.querySelector('lexml-eta-emenda-articulacao')!['style'].display = 'block';
   }
 
-  setDispositivosERevisoesEmenda(dispositivosEmenda: DispositivosEmenda | undefined, revisoes?: Revisao[]): void {
+  setDispositivosERevisoesEmenda(revisoes?: Revisao[]): void {
     this.revisoes = revisoes;
-    if (dispositivosEmenda) {
-      this.dispositivosEmenda = dispositivosEmenda;
-      this.loadEmenda();
-    }
+    this.loadEmenda();
   }
 
   getProjetoAtualizado(): any {
@@ -82,12 +79,10 @@ export class LexmlEtaComponent extends connect(rootStore)(LitElement) {
 
   private _timerLoadEmenda = 0;
   private loadEmenda(): void {
-    if (this.dispositivosEmenda) {
-      clearInterval(this._timerLoadEmenda);
-      this._timerLoadEmenda = window.setTimeout(() => {
-        rootStore.dispatch(aplicarAlteracoesEmendaAction.execute(this.dispositivosEmenda!, this.revisoes));
-      }, 1000);
-    }
+    clearInterval(this._timerLoadEmenda);
+    this._timerLoadEmenda = window.setTimeout(() => {
+      rootStore.dispatch(aplicarAlteracoesEmendaAction.execute(this.dispositivosEmenda!, this.revisoes));
+    }, 1000);
   }
 
   render(): TemplateResult {
