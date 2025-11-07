@@ -15,8 +15,8 @@ import { Revisao } from '../model/revisao/revisao';
 import { LexmlEtaParametrosEdicao } from './lexml-emenda.component';
 import { EditorComponent } from './editor/editor.component';
 
-@customElement('lexml-eta-emenda')
-export class LexmlEtaComponent extends connect(rootStore)(LitElement) {
+@customElement('lexml-eta-proposicao')
+export class LexmlEtaProposicaoComponent extends connect(rootStore)(LitElement) {
   @property({ type: Object }) lexmlEtaConfig: LexmlEtaConfig = new LexmlEtaConfig();
 
   @query('lexml-eta-emenda-editor')

@@ -18,7 +18,7 @@ import { Autoria, ColegiadoApreciador, Emenda, Epigrafe, Parlamentar, OpcoesImpr
 import { buildFakeUrn, getAno, getNumero, getSigla, getTipo } from '../model/lexml/documento/urnUtil';
 import { rootStore } from '../redux/store';
 import { ProjetoNorma } from './../model/lexml/documento/projetoNorma';
-import { LexmlEtaComponent } from './lexml-eta.component';
+import { LexmlEtaProposicaoComponent } from './lexml-eta-proposicao.component';
 import { limparAlertas } from '../model/alerta/acao/limparAlertas';
 import { LexmlEtaConfig } from '../model/lexmlEtaConfig';
 import { atualizarUsuarioAction } from '../model/lexml/acao/atualizarUsuarioAction';
@@ -124,8 +124,8 @@ export class LexmlEmendaComponent extends connect(rootStore)(LitElement) {
 
   @query('lexml-substituicao-termo')
   _substituicaoTermo?: SubstituicaoTermoComponent;
-  @query('lexml-eta-emenda')
-  _lexmlEta?: LexmlEtaComponent;
+  @query('lexml-eta-proposicao')
+  _lexmlEta?: LexmlEtaProposicaoComponent;
   @query('#editor-texto-rico-emenda')
   _lexmlEmendaTextoRico;
   @query('#editor-texto-rico-justificativa')
@@ -320,7 +320,7 @@ export class LexmlEmendaComponent extends connect(rootStore)(LitElement) {
         this.desativarMarcaRevisao();
       }
 
-      this._tabsEsquerda.show('lexml-eta-emenda');
+      this._tabsEsquerda.show('lexml-eta-proposicao');
 
       setTimeout(() => {
         this._tabsDireita?.show('notas');
@@ -843,7 +843,7 @@ export class LexmlEmendaComponent extends connect(rootStore)(LitElement) {
               <div class="badge-pulse" id="contadorAvisos">${this.totalAlertas > 0 ? html` <sl-badge variant="danger" pill pulse>${this.totalAlertas}</sl-badge> ` : ''}</div>
             </sl-tab>
             <sl-tab-panel name="lexml-eta-emenda" class="overflow-hidden">
-              <lexml-eta-emenda style="display: block}" id="lexmlEta" .lexmlEtaConfig=${this.lexmlEmendaConfig} @onchange=${this.onChange}></lexml-eta-emenda>
+              <lexml-eta-proposicao style="display: block}" id="lexmlEta" .lexmlEtaConfig=${this.lexmlEmendaConfig} @onchange=${this.onChange}></lexml-eta-proposicao>
             </sl-tab-panel>
             <sl-tab-panel name="justificativa" class="overflow-hidden">
               <editor-texto-rico

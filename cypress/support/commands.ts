@@ -258,7 +258,7 @@ Cypress.Commands.add('checarEstadoInicialAoCriarNovaEmendaEstruturada', (payload
   cy.get('lexml-emenda').should('exist');
 
   // lexml-eta deve existir e estar visível
-  cy.get('lexml-eta-emenda').should('exist').should('have.attr', 'style', 'display: block');
+  cy.get('lexml-eta-proposicao').should('exist').should('have.attr', 'style', 'display: block');
 
   // editor-texto-rico deve existir e estar oculto
   cy.get('editor-texto-rico[modo="textoLivre"]').should('exist').should('have.attr', 'style', 'display: none');
