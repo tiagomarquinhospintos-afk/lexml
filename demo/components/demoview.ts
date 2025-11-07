@@ -1,7 +1,7 @@
 import { PL_5008_2023 } from '../doc/pl_5008_2023';
 import { html, LitElement, TemplateResult } from 'lit';
 import { customElement, query, state } from 'lit/decorators.js';
-import { LexmlEmendaConfig, LexmlEmendaComponent, LexmlEtaParametrosEdicao, Usuario } from '../../src';
+import { LexmlEtaConfig, LexmlEmendaComponent, LexmlEtaParametrosEdicao, Usuario } from '../../src';
 import { RefProposicaoEmendada } from '../../src/model/emenda/emenda';
 import { COD_CIVIL_COMPLETO } from '../doc/codigocivil_completo';
 import { COD_CIVIL_PARCIAL1 } from '../doc/codigocivil_parcial1';
@@ -116,11 +116,11 @@ export class DemoView extends LitElement {
   @state() proposicaoCorrente = new RefProposicaoEmendada();
 
   private nomeUsuario?: string = 'Fulano';
-  emendaConfig: LexmlEmendaConfig;
+  emendaConfig: LexmlEtaConfig;
 
   constructor() {
     super();
-    this.emendaConfig = new LexmlEmendaConfig();
+    this.emendaConfig = new LexmlEtaConfig();
     this.emendaConfig.urlConsultaParlamentares = '/parlamentares';
     this.emendaConfig.urlComissoes = '/comissoes';
   }

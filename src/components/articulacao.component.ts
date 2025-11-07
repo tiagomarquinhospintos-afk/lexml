@@ -4,13 +4,13 @@ import { customElement, property } from 'lit/decorators.js';
 import { connect } from 'pwa-helpers';
 
 import { Elemento } from '../model/elemento';
-import { LexmlEmendaConfig } from '../model/lexmlEmendaConfig';
+import { LexmlEtaConfig } from '../model/lexmlEtaConfig';
 import { rootStore } from '../redux/store';
 
 @customElement('lexml-eta-emenda-articulacao')
 export class ArticulacaoComponent extends connect(rootStore)(LitElement) {
   @property({ type: Array }) elementos: Elemento[] = [];
-  @property({ type: Object }) lexmlEtaConfig: LexmlEmendaConfig = new LexmlEmendaConfig();
+  @property({ type: Object }) lexmlEtaConfig: LexmlEtaConfig = new LexmlEtaConfig();
 
   constructor() {
     super();

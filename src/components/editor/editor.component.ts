@@ -58,7 +58,7 @@ import { editarNotaAlteracaoDialog } from './editarNotaAlteracaoDialog';
 import { informarNormaDialog } from './informarNormaDialog';
 import { RevisaoElemento } from '../../model/revisao/revisao';
 import { transformarAction } from '../../model/lexml/acao/transformarAction';
-import { LexmlEmendaConfig } from '../../model/lexmlEmendaConfig';
+import { LexmlEtaConfig } from '../../model/lexmlEtaConfig';
 import { aceitarRevisaoAction } from '../../model/lexml/acao/aceitarRevisaoAction';
 import { rejeitarRevisaoAction } from '../../model/lexml/acao/rejeitarRevisaoAction';
 import { TextoDiff, exibirDiferencasDialog } from './exibirDiferencaDialog';
@@ -77,7 +77,7 @@ import { Anexo } from '../../model/emenda/emenda';
 
 @customElement('lexml-eta-emenda-editor')
 export class EditorComponent extends connect(rootStore)(LitElement) {
-  @property({ type: Object }) lexmlEtaConfig: LexmlEmendaConfig = new LexmlEmendaConfig();
+  @property({ type: Object }) lexmlEtaConfig: LexmlEtaConfig = new LexmlEtaConfig();
 
   @query('lexml-ajuda-modal')
   private ajudaModal!: AjudaModalComponent;

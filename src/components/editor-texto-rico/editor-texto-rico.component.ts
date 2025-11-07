@@ -18,7 +18,7 @@ import { removeElementosTDOcultos } from './texto-rico-util';
 import { NoIndentClass } from './text-indent';
 import { MarginBottomClass } from './margin-bottom';
 import { StateEvent, StateType } from '../../redux/state';
-import { LexmlEmendaConfig } from '../../model/lexmlEmendaConfig';
+import { LexmlEtaConfig } from '../../model/lexmlEtaConfig';
 import { AlterarLarguraTabelaColunaModalComponent } from './alterar-largura-tabela-coluna-modal';
 import { AlterarLarguraImagemModalComponent } from './alterar-largura-imagem-modal';
 import { notaRodapeCss } from './notaRodape.css';
@@ -46,7 +46,7 @@ export class EditorTextoRicoComponent extends connect(rootStore)(LitElement) {
   @property({ type: Array }) anexos: Anexo[] = [];
   @property({ type: Array }) notasRodape: NotaRodape[] = [];
   @property({ type: String, attribute: 'registro-evento' }) registroEvento = '';
-  @property({ type: Object }) lexmlEtaConfig: LexmlEmendaConfig = new LexmlEmendaConfig();
+  @property({ type: Object }) lexmlEtaConfig: LexmlEtaConfig = new LexmlEtaConfig();
 
   @property({ type: String })
   modo = '';
