@@ -15,13 +15,5 @@ export function NumeracaoGenerico<TBase extends Constructor>(Base: TBase): any {
     createRotulo(): void {
       this.rotulo = this.numero === undefined ? 'dg' : this.numero + this.SUFIXO;
     }
-
-    getNumeracaoParaComandoEmenda(): string {
-      return this.numero === undefined ? 'dg' : this.numero;
-    }
-
-    getNumeracaoComRotuloParaComandoEmenda(): string {
-      return this.getNumeracaoParaComandoEmenda();
-    }
   };
 }

@@ -1,14 +1,13 @@
-import { isRevisaoPrincipal, getQuantidadeRevisoes, isRevisaoDeTransformacao } from './../../redux/elemento/util/revisaoUtil';
+import { isRevisaoPrincipal, getQuantidadeRevisoes, isRevisaoDeTransformacao, isRevisaoDeExclusao, setCheckedElement } from '../../redux/elemento/util/revisaoUtil';
 import { uploadAnexoDialog } from '../editor-texto-rico/uploadAnexoDialog';
 import { colarTextoArticuladoDialog, onChangeColarDialog } from './colarTextoArticuladoDialog';
-import { InfoTextoColado } from './../../redux/elemento/util/colarUtil';
-import { AdicionarAgrupadorArtigo } from './../../model/lexml/acao/adicionarAgrupadorArtigoAction';
+import { InfoTextoColado } from '../../redux/elemento/util/colarUtil';
+import { AdicionarAgrupadorArtigo } from '../../model/lexml/acao/adicionarAgrupadorArtigoAction';
 import { adicionarAgrupadorArtigoDialog } from './adicionarAgrupadorArtigoDialog';
 import { SlButton, SlInput } from '@shoelace-style/shoelace';
 import { html, LitElement, TemplateResult } from 'lit';
 import { customElement, property, query } from 'lit/decorators.js';
 import { connect } from 'pwa-helpers';
-import { CmdEmdUtil } from '../../emenda/comando-emenda-util';
 import { adicionarAlerta } from '../../model/alerta/acao/adicionarAlerta';
 import { removerAlerta } from '../../model/alerta/acao/removerAlerta';
 import { ClassificacaoDocumento } from '../../model/documento/classificacao';
@@ -35,7 +34,7 @@ import { validarElementoAction } from '../../model/lexml/acao/validarElementoAct
 import { normalizaSeForOmissis } from '../../model/lexml/conteudo/conteudoUtil';
 import { TEXTO_OMISSIS } from '../../model/lexml/conteudo/textoOmissis';
 import { getNomeExtenso } from '../../model/lexml/documento/urnUtil';
-import { formatarMilhares, podeRenumerar, rotuloParaEdicao } from '../../model/lexml/numeracao/numeracaoUtil';
+import { formatarMilhares, podeRenumerar, rotuloParaEdicao, isNumeracaoValidaPorTipo } from '../../model/lexml/numeracao/numeracaoUtil';
 import { TipoDispositivo } from '../../model/lexml/tipo/tipoDispositivo';
 import { Paginacao, StateEvent, StateType } from '../../redux/state';
 import { AutoFix, TipoMensagem } from '../../model/lexml/util/mensagem';
@@ -53,16 +52,13 @@ import { EtaQuillUtil } from '../../util/eta-quill/eta-quill-util';
 import { Subscription } from '../../util/observable';
 import { AjudaModalComponent } from '../ajuda/ajuda.modal.component';
 import { AtalhosModalComponent } from '../ajuda/atalhos.modal.component';
-import { atualizarNotaAlteracaoAction } from './../../model/lexml/acao/atualizarNotaAlteracaoAction';
-import { isNumeracaoValidaPorTipo } from './../../model/lexml/numeracao/numeracaoUtil';
-import { ComandoEmendaModalComponent } from './../comandoEmenda/comandoEmenda.modal.component';
+import { atualizarNotaAlteracaoAction } from '../../model/lexml/acao/atualizarNotaAlteracaoAction';
 import { assistenteAlteracaoDialog } from './assistenteAlteracaoDialog';
 import { editarNotaAlteracaoDialog } from './editarNotaAlteracaoDialog';
 import { informarNormaDialog } from './informarNormaDialog';
 import { RevisaoElemento } from '../../model/revisao/revisao';
 import { transformarAction } from '../../model/lexml/acao/transformarAction';
-import { LexmlEmendaConfig } from '../../model/lexmlEmendaConfig';
-import { isRevisaoDeExclusao, setCheckedElement } from '../../redux/elemento/util/revisaoUtil';
+import { LexmlEtaConfig } from '../../model/lexmlEtaConfig';
 import { aceitarRevisaoAction } from '../../model/lexml/acao/aceitarRevisaoAction';
 import { rejeitarRevisaoAction } from '../../model/lexml/acao/rejeitarRevisaoAction';
 import { TextoDiff, exibirDiferencasDialog } from './exibirDiferencaDialog';
@@ -76,21 +72,18 @@ import { SufixosModalComponent } from '../sufixos/sufixos.modal.componet';
 import { getElementos } from '../../model/elemento/elementoUtil';
 import { selecionarPaginaArticulacaoAction } from '../../model/lexml/acao/selecionarPaginaArticulacaoAction';
 import { navegarEntreElementosAlteradosAction, TDirecao } from '../../model/lexml/acao/navegarEntreElementosAlteradosAction';
-import { emendaDivididaDialog } from './emendaDivididaDialog';
+import { ProposicaoDivididaDialog } from './proposicaoDivididaDialog';
 import { Anexo } from '../../model/emenda/emenda';
 
-@customElement('lexml-eta-emenda-editor')
+@customElement('lexml-eta-proposicao-editor')
 export class EditorComponent extends connect(rootStore)(LitElement) {
-  @property({ type: Object }) lexmlEtaConfig: LexmlEmendaConfig = new LexmlEmendaConfig();
+  @property({ type: Object }) lexmlEtaConfig: LexmlEtaConfig = new LexmlEtaConfig();
 
   @query('lexml-ajuda-modal')
   private ajudaModal!: AjudaModalComponent;
 
   @query('lexml-atalhos-modal')
   private atalhosModal!: AtalhosModalComponent;
-
-  @query('lexml-emenda-comando-modal')
-  private comandoEmendaModal!: ComandoEmendaModalComponent;
 
   @query('lexml-sufixos-modal')
   private sufixosModal!: SufixosModalComponent;
@@ -101,8 +94,8 @@ export class EditorComponent extends connect(rootStore)(LitElement) {
   @query('#btnRejeitarTodasRevisoes')
   private btnRejeitarTodasRevisoes!: HTMLButtonElement;
 
-  @query('emenda-dividida-modal')
-  private emendaDivididaDialog!: emendaDivididaDialog;
+  @query('proposicao-dividida-modal')
+  private proposicaoDivididaDialog!: ProposicaoDivididaDialog;
 
   private modo = ClassificacaoDocumento.PROJETO;
 
@@ -186,7 +179,7 @@ export class EditorComponent extends connect(rootStore)(LitElement) {
           --lx-eta-editor-overflow: display;
         }
 
-        lexml-eta-emenda-editor .ql-editor {
+        lexml-eta-proposicao-editor .ql-editor {
           white-space: normal;
         }
 
@@ -272,10 +265,6 @@ export class EditorComponent extends connect(rootStore)(LitElement) {
 
           <input type="button" @click=${this.artigoOndeCouber} class="${'ql-hidden'} btn--artigoOndeCouber" value="Propor artigo onde couber" title="Artigo onde couber"></input>
           <div class="mobile-buttons">
-            <button class="mobile-button btn-comando" title="Comando" @click=${this.showComandoEmendaModal}>
-              <sl-icon name="code"></sl-icon>
-              <span>Comando</span>
-            </button>
             <button class="mobile-button btn-dicas" title="Dicas" @click=${this.showAjudaModal}>
               <sl-icon name="lightbulb"></sl-icon>
               <span>Dicas</span>
@@ -290,10 +279,9 @@ export class EditorComponent extends connect(rootStore)(LitElement) {
       </div>
       <div id="lx-eta-buffer"><p></p></div>
       <lexml-ajuda-modal></lexml-ajuda-modal>
-      <lexml-emenda-comando-modal></lexml-emenda-comando-modal>
       <lexml-atalhos-modal></lexml-atalhos-modal>
       <lexml-sufixos-modal></lexml-sufixos-modal>
-      <emenda-dividida-modal></emenda-dividida-modal>
+      <proposicao-dividida-modal></proposicao-dividida-modal>
     `;
   }
 
@@ -315,10 +303,6 @@ export class EditorComponent extends connect(rootStore)(LitElement) {
 
   private showAtalhosModal(): void {
     this.atalhosModal.show();
-  }
-
-  private showComandoEmendaModal(): void {
-    this.comandoEmendaModal.show();
   }
 
   private formatacaoAlterada(): void {
@@ -657,7 +641,7 @@ export class EditorComponent extends connect(rootStore)(LitElement) {
     if (paginasArticulacao.length <= 1) {
       return;
     } else {
-      this.emendaDivididaDialog.show();
+      this.proposicaoDivididaDialog.show();
     }
 
     // Cria elemento select para escolher a página
@@ -1339,25 +1323,6 @@ export class EditorComponent extends connect(rootStore)(LitElement) {
     }
   }
 
-  private alertaGlobalVerificaRenumeracao(): void {
-    const idAlerta = 'alerta-global-renumeracao';
-    const dispositivos = CmdEmdUtil.getDispositivosAdicionados(rootStore.getState().elementoReducer.articulacao);
-
-    if (dispositivos.length && CmdEmdUtil.verificaNecessidadeRenumeracaoRedacaoFinal(dispositivos)) {
-      const alerta = {
-        id: idAlerta,
-        tipo: TipoMensagem.WARNING,
-        mensagem:
-          'Os rótulos apresentados servem apenas para o posicionamento correto do novo dispositivo no texto. Serão feitas as renumerações necessárias no momento da consolidação das emendas.',
-        podeFechar: true,
-      };
-
-      rootStore.dispatch(adicionarAlerta(alerta));
-    } else {
-      rootStore.dispatch(removerAlerta(idAlerta));
-    }
-  }
-
   private alertaGlobalRevisao(): void {
     const id = 'alerta-global-revisao';
     const revisoesElementos = document.getElementsByClassName('blot__revisao');
@@ -1400,10 +1365,6 @@ export class EditorComponent extends connect(rootStore)(LitElement) {
         },
       })
     );
-
-    if (this.eventosOnChange?.length && (this.eventosOnChange.includes(StateType.ElementoIncluido) || this.eventosOnChange.includes(StateType.ElementoRemovido))) {
-      this.alertaGlobalVerificaRenumeracao();
-    }
 
     this.alertaGlobalRevisao();
     this.eventosOnChange = [];

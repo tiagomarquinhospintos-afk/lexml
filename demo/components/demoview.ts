@@ -1,9 +1,7 @@
-import { PL_5008_2023 } from './../doc/pl_5008_2023';
-import { LexmlEmendaConfig } from './../../src/model/lexmlEmendaConfig';
+import { PL_5008_2023 } from '../doc/pl_5008_2023';
 import { html, LitElement, TemplateResult } from 'lit';
 import { customElement, query, state } from 'lit/decorators.js';
-import '../../src';
-import { LexmlEmendaComponent, LexmlEmendaParametrosEdicao } from '../../src/components/lexml-emenda.component';
+import { LexmlEtaConfig, LexmlEmendaComponent, LexmlEtaParametrosEdicao, Usuario } from '../../src';
 import { RefProposicaoEmendada } from '../../src/model/emenda/emenda';
 import { COD_CIVIL_COMPLETO } from '../doc/codigocivil_completo';
 import { COD_CIVIL_PARCIAL1 } from '../doc/codigocivil_parcial1';
@@ -17,9 +15,7 @@ import { MPV_1078_2021 } from '../doc/mpv_1078_2021';
 import { MPV_1160_2023 } from '../doc/mpv_1160_2023';
 import { PLC_ARTIGOS_AGRUPADOS } from '../doc/plc_artigos_agrupados';
 import { PL_AGRUPADORES } from '../doc/pl_agrupadores';
-import { ComandoEmendaComponent } from './../../src/components/comandoEmenda/comandoEmenda.component';
-import { getAno, getNumero, getSigla } from './../../src/model/lexml/documento/urnUtil';
-import { Usuario } from '../../src/model/revisao/usuario';
+import { getAno, getNumero, getSigla } from '../../src/model/lexml/documento/urnUtil';
 import { PDL_343_2023 } from '../doc/pdl_343_2023';
 import { PEC_48_2023 } from '../doc/pec_48_2023';
 import { PLC_142_2028 } from '../doc/plc_142_2028';
@@ -115,19 +111,16 @@ export class DemoView extends LitElement {
   @query('lexml-emenda')
   private elLexmlEmenda!: LexmlEmendaComponent;
 
-  @query('lexml-emenda-comando')
-  private elLexmlEmendaComando!: ComandoEmendaComponent;
-
   @state() modo = 'edicao';
   @state() projetoNorma: any = {};
   @state() proposicaoCorrente = new RefProposicaoEmendada();
 
   private nomeUsuario?: string = 'Fulano';
-  emendaConfig: LexmlEmendaConfig;
+  emendaConfig: LexmlEtaConfig;
 
   constructor() {
     super();
-    this.emendaConfig = new LexmlEmendaConfig();
+    this.emendaConfig = new LexmlEtaConfig();
     this.emendaConfig.urlConsultaParlamentares = '/parlamentares';
     this.emendaConfig.urlComissoes = '/comissoes';
   }
@@ -157,12 +150,8 @@ export class DemoView extends LitElement {
     const { sigla, numero, ano } = this.getSiglaNumeroAnoFromUrn(projetoNorma?.value?.metadado?.identificacao?.urn);
 
     const key = `${sigla.toLowerCase()}_${numero}_${ano}`;
-    let el = this.getElement(`option[value="${key}"]`);
+    const el = this.getElement(`option[value="${key}"]`);
     el ? (el.selected = true) : undefined;
-
-    el = this.getElement('#optEmenda');
-    el.disabled = false;
-    el.selected = true;
   }
 
   onChangeDocumento(): void {
@@ -177,10 +166,9 @@ export class DemoView extends LitElement {
 
   limparTela(): void {
     this.elLexmlEmenda.style.display = 'none';
-    this.elLexmlEmendaComando.style.display = 'none';
     this.projetoNorma = {};
 
-    const params = new LexmlEmendaParametrosEdicao();
+    const params = new LexmlEtaParametrosEdicao();
     params.projetoNorma = this.projetoNorma;
     this.elLexmlEmenda.inicializarEdicao(params);
 
@@ -203,29 +191,19 @@ export class DemoView extends LitElement {
         this.projetoNorma = this.elDocumento.value.indexOf('sem_texto') >= 0 ? null : { ...mapProjetosNormas[this.elDocumento.value] };
 
         if (this.elLexmlEmenda) {
-          const params = new LexmlEmendaParametrosEdicao();
+          const params = new LexmlEtaParametrosEdicao();
           params.configuracaoPaginacao = mapConfiguracaoPaginacaoDispositivos[this.elDocumento.value];
           params.dispositivosBloqueados = mapDispositivosBloqueados[this.elDocumento.value];
 
           if (this.projetoNorma && Object.keys(this.projetoNorma).length > 0) {
             params.projetoNorma = this.projetoNorma;
-
-            params.isMateriaOrcamentaria = this.elLexmlEmenda.getEmentaFromProjetoNorma(this.projetoNorma).indexOf('crédito extraordinário') >= 0;
-
-            // params.urn = this.projetoNorma?.value?.metadado?.identificacao?.urn;
             //params.autoriaPadrao = { identificacao: '6335', siglaCasaLegislativa: 'SF' };
             //params.opcoesImpressaoPadrao = { imprimirBrasao: true, textoCabecalho: 'Texto Teste Dennys', tamanhoFonte: 14 };
           } else {
-            params.proposicao = {
-              sigla: 'PL',
-              numero: '1',
-              ano: new Date().getFullYear().toString(),
-              ementa:
-                'Cria o protocolo “Não é Não”, para prevenção ao constrangimento e à violência contra a mulher e para proteção à vítima; institui o selo “Não é Não - Mulheres Seguras”; e altera a Lei nº 14.597, de 14 de junho de 2023 (Lei Geral do Esporte).',
-            };
+            params.sigla = 'PL';
+            params.numero = '1';
+            params.ano = new Date().getFullYear().toString();
           }
-          params.emendarTextoSubstitutivo = false;
-          params.motivo = 'Motivo da emenda de texto livre';
           // params.casaLegislativa = 'SF';
           this.elLexmlEmenda.inicializarEdicao(params);
 
@@ -239,10 +217,10 @@ export class DemoView extends LitElement {
   }
 
   salvar(): void {
-    const emenda = this.elLexmlEmenda.getEmenda();
-    const emendaJson = JSON.stringify(emenda, null, '\t');
-    const blob = new Blob([emendaJson], { type: 'application/json' });
-    const fileName = `${this.modo} - ${emenda.proposicao.sigla} nº ${emenda.proposicao.numero}, de ${emenda.proposicao.ano}.json`;
+    const proposicao = this.elLexmlEmenda.getProposicao();
+    const proposicaoJson = JSON.stringify(proposicao, null, '\t');
+    const blob = new Blob([proposicaoJson], { type: 'application/json' });
+    const fileName = `${this.modo} - ${proposicao.sigla} nº ${proposicao.numero}, de ${proposicao.ano}.json`;
     const objectUrl = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = objectUrl;
@@ -274,20 +252,17 @@ export class DemoView extends LitElement {
       fReader.readAsText(fileInput.files[0]);
       fReader.onloadend = async (e): Promise<void> => {
         if (e.target?.result) {
-          const result = JSON.parse(e.target.result as string);
-          const emenda = 'emenda' in result ? result.emenda : result;
-          this.modo = emenda.modoEdicao;
-          this.projetoNorma = await this.getProjetoNormaJsonixFromEmenda(emenda);
+          this.modo = 'edicao';
+          const proposicao = JSON.parse(e.target.result as string);
+          this.projetoNorma = proposicao.projetoNorma;
 
-          const params = new LexmlEmendaParametrosEdicao();
+          const params = new LexmlEtaParametrosEdicao();
           params.projetoNorma = this.projetoNorma;
-          params.emenda = emenda;
+          params.proposicao = proposicao;
           this.elLexmlEmenda.inicializarEdicao(params);
 
           this.atualizarProposicaoCorrente(this.projetoNorma);
           this.atualizarSelects(this.projetoNorma);
-          this.elLexmlEmendaComando.emenda = emenda.comandoEmenda;
-          this.elLexmlEmendaComando.style.display = 'block';
           // this.getElement('.wrapper').style['grid-template-columns'] = '2fr 1fr';
           this.elLexmlEmenda.style.display = 'block';
 
@@ -400,7 +375,7 @@ export class DemoView extends LitElement {
             <option value="novo">Nova articulação</option>
             ${Object.keys(mapProjetosNormas)
               .filter(k => !k.startsWith('_'))
-              .map(k => html`<option value="${k}" ?selected=${k === 'mpv_905_2019'}>${k.toUpperCase().replace(/_/, ' ').replace(/_/, ', de ')}</option>`)}
+              .map(k => html`<option value="${k}" ?selected=${k === 'plp_197_2023'}>${k.toUpperCase().replace(/_/, ' ').replace(/_/, ', de ')}</option>`)}
             <option value="_codcivil_completo">Código Civil Completo</option>
             <option value="_codcivil_parcial1">Código Civil (arts. 1 a 1023)</option>
             <option value="_codcivil_parcial2">Código Civil (arts. 1 a 388)</option>

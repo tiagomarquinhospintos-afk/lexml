@@ -14,13 +14,5 @@ export function NumeracaoCaput<TBase extends Constructor>(Base: TBase): any {
     createNumeroFromRotulo(): void {
       //
     }
-
-    getNumeracaoParaComandoEmenda(): string {
-      return '';
-    }
-
-    getNumeracaoComRotuloParaComandoEmenda(): string {
-      return 'caput';
-    }
   };
 }

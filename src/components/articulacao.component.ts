@@ -4,13 +4,13 @@ import { customElement, property } from 'lit/decorators.js';
 import { connect } from 'pwa-helpers';
 
 import { Elemento } from '../model/elemento';
-import { LexmlEmendaConfig } from '../model/lexmlEmendaConfig';
+import { LexmlEtaConfig } from '../model/lexmlEtaConfig';
 import { rootStore } from '../redux/store';
 
-@customElement('lexml-eta-emenda-articulacao')
+@customElement('lexml-eta-articulacao')
 export class ArticulacaoComponent extends connect(rootStore)(LitElement) {
   @property({ type: Array }) elementos: Elemento[] = [];
-  @property({ type: Object }) lexmlEtaConfig: LexmlEmendaConfig = new LexmlEmendaConfig();
+  @property({ type: Object }) lexmlEtaConfig: LexmlEtaConfig = new LexmlEtaConfig();
 
   constructor() {
     super();
@@ -24,19 +24,19 @@ export class ArticulacaoComponent extends connect(rootStore)(LitElement) {
   render(): TemplateResult {
     return html`
       <style>
-        lexml-eta-emenda-editor {
+        lexml-eta-proposicao-editor {
           display: block;
           height: 100%;
         }
 
-        lexml-eta-emenda-editor:focus {
+        lexml-eta-proposicao-editor:focus {
           outline: 0;
           border: 0px solid #f1f1f1;
           -webkit-box-shadow: 0px;
           box-shadow: none;
         }
       </style>
-      <lexml-eta-emenda-editor .lexmlEtaConfig=${this.lexmlEtaConfig}></lexml-eta-emenda-editor>
+      <lexml-eta-proposicao-editor .lexmlEtaConfig=${this.lexmlEtaConfig}></lexml-eta-proposicao-editor>
     `;
   }
 }

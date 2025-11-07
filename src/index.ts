@@ -27,31 +27,29 @@ import { ModuloNotaRodape } from './components/editor-texto-rico/moduloNotaRodap
 // ---------------------------------------------------
 
 export { ArticulacaoComponent } from './components/articulacao.component';
-export { ComandoEmendaComponent } from './components/comandoEmenda/comandoEmenda.component';
 export { EditorComponent } from './components/editor/editor.component';
 export { ElementoComponent } from './components/elemento/elemento.component';
 export { AtalhosComponent as HelpComponent } from './components/ajuda/atalhos.component';
 export { EditorTextoRicoComponent } from './components/editor-texto-rico/editor-texto-rico.component';
 export { AlterarLarguraTabelaColunaModalComponent } from './components/editor-texto-rico/alterar-largura-tabela-coluna-modal';
 export { AlterarLarguraImagemModalComponent } from './components/editor-texto-rico/alterar-largura-imagem-modal';
-export { LexmlEtaComponent } from './components/lexml-eta.component';
+export { LexmlEtaProposicaoComponent } from './components/lexml-eta-proposicao.component';
 export { AutoriaComponent } from './components/autoria/autoria.component';
 export { DestinoComponent } from './components/destino/destino.component';
 export { LexmlAutocomplete } from './components/lexml-autocomplete';
 export { DataComponent } from './components/data/data.component';
-export { LexmlEmendaComponent, LexmlEmendaParametrosEdicao } from './components/lexml-emenda.component';
-export { LexmlEmendaConfig } from './model/lexmlEmendaConfig';
+export { LexmlEmendaComponent, LexmlEtaParametrosEdicao } from './components/lexml-emenda.component';
+export { LexmlEtaConfig } from './model/lexmlEtaConfig';
 export { AlertasComponent } from './components/alertas/alertas.component';
 export { AjudaComponent } from './components/ajuda/ajuda.component';
 export { AjudaModalComponent } from './components/ajuda/ajuda.modal.component';
 export { SufixosModalComponent } from './components/sufixos/sufixos.modal.componet';
-export { ComandoEmendaModalComponent } from './components/comandoEmenda/comandoEmenda.modal.component';
 export { AtalhosModalComponent } from './components/ajuda/atalhos.modal.component';
 export { OpcoesImpressaoComponent } from './components/opcoesImpressao/opcoesImpressao.component';
 export { SwitchRevisaoComponent } from './components/switchRevisao/switch-revisao.component';
 export { SubstituicaoTermoComponent } from './components/substituicao-termo/substituicao-termo.component';
 export { Usuario } from './model/revisao/usuario';
-export { emendaDivididaDialog } from './components/editor/emendaDivididaDialog';
+export { ProposicaoDivididaDialog } from './components/editor/proposicaoDivididaDialog';
 
 Quill.register('modules/aspasCurvas', ModuloAspasCurvas, true);
 Quill.register('modules/revisao', ModuloRevisao, true);

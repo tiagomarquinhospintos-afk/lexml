@@ -1,4 +1,4 @@
-export class LexmlEmendaConfig {
+export class LexmlEtaConfig {
   urlConsultaParlamentares = 'api/parlamentares';
   urlAutocomplete = 'api/autocomplete-norma';
   urlComissoes?: string;

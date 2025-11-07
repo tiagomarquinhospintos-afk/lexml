@@ -1,5 +1,5 @@
 import { html, TemplateResult } from 'lit-html';
-import '../src/components/lexml-eta.component.js';
+import '../src/components/lexml-eta-proposicao.component';
 
 export default {
   title: 'Editor de Textos Articulados',

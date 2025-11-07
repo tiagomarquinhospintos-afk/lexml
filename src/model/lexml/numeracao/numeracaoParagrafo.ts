@@ -2,7 +2,7 @@ import { Dispositivo } from '../../dispositivo/dispositivo';
 import { Numeracao } from '../../dispositivo/numeracao';
 import { isParagrafo } from '../../dispositivo/tipo';
 import { TipoDispositivo } from '../tipo/tipoDispositivo';
-import { isDispositivoNovoNaNormaAlterada } from './../hierarquia/hierarquiaUtil';
+import { isDispositivoNovoNaNormaAlterada } from '../hierarquia/hierarquiaUtil';
 import { converteLetrasComplementoParaNumero, converteNumeroArabicoParaLetra, isNumeracaoValida, trataNumeroAndComplemento } from './numeracaoUtil';
 
 export function NumeracaoParagrafo<TBase extends Constructor>(Base: TBase): any {
@@ -80,24 +80,6 @@ export function NumeracaoParagrafo<TBase extends Constructor>(Base: TBase): any 
           : '') +
         (!paraComandoEmenda && (!ordinal || remaining.length) ? '.' : '')
       );
-    }
-
-    getNumeracaoParaComandoEmenda(dispositivo: Dispositivo): string {
-      if (this.numero === undefined) {
-        return '[ainda não numerado]'; // TipoDispositivo.paragrafo.descricao?.toLocaleLowerCase() + '';
-      }
-      return this.isParagrafoUnico() ? 'parágrafo único' : this.getNumeroAndSufixoNumeracao(dispositivo, true);
-    }
-
-    getNumeracaoComRotuloParaComandoEmenda(dispositivo: Dispositivo): string {
-      if (this.numero === undefined) {
-        return TipoDispositivo.paragrafo.descricao?.toLocaleLowerCase() + ' [ainda não numerado]';
-      }
-      return this.isParagrafoUnico() ? 'parágrafo único' : '§ ' + this.getNumeroAndSufixoNumeracao(dispositivo, true);
-    }
-
-    private isParagrafoUnico(): boolean {
-      return (this.isDispositivoAlteracao && this.rotulo?.includes('único')) || (!this.isDispositivoAlteracao && this.pai?.filhos.filter(f => isParagrafo(f)).length === 1);
     }
   };
 }

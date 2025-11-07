@@ -31,19 +31,5 @@ export function NumeracaoItem<TBase extends Constructor>(Base: TBase): any {
           ? TipoDispositivo.item.name
           : trataNumeroAndComplemento(this.numero, undefined, dispositivo.isDispositivoAlteracao ? converteNumerosComplementoParaLetra : undefined) + this.SUFIXO;
     }
-
-    getNumeracaoParaComandoEmenda(): string {
-      if (this.numero === undefined) {
-        return '[ainda não numerado]'; // TipoDispositivo.item.descricao?.toLowerCase() + '';
-      }
-      return this.rotulo!.trim().replace('.', '');
-    }
-
-    getNumeracaoComRotuloParaComandoEmenda(): string {
-      if (this.numero === undefined) {
-        return TipoDispositivo.item.descricao?.toLocaleLowerCase() + ' [ainda não numerado]';
-      }
-      return TipoDispositivo.item.descricao?.toLocaleLowerCase() + ' ' + this.getNumeracaoParaComandoEmenda();
-    }
   };
 }

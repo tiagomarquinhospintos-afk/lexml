@@ -1,8 +1,8 @@
 import { LitElement, html, css, TemplateResult } from 'lit';
 import { customElement, query } from 'lit/decorators.js';
 
-@customElement('emenda-dividida-modal')
-export class emendaDivididaDialog extends LitElement {
+@customElement('proposicao-dividida-modal')
+export class ProposicaoDivididaDialog extends LitElement {
   @query('sl-dialog')
   private slDialog!: any;
 
@@ -36,6 +36,6 @@ export class emendaDivididaDialog extends LitElement {
 
 declare global {
   interface HTMLElementTagNameMap {
-    'emenda-dividida-modal': emendaDivididaDialog;
+    'proposicao-dividida-modal': ProposicaoDivididaDialog;
   }
 }

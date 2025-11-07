@@ -77,7 +77,7 @@ export class AutoriaComponent extends LitElement {
     const oldValue = this._autoriaOriginal;
     this._autoriaOriginal = value;
 
-    this._autoria = value ? { ...value, parlamentares: [...value.parlamentares] } : new Autoria();
+    this._autoria = value && Object.keys(value).length > 0 ? { ...value, parlamentares: [...value.parlamentares] } : new Autoria();
     if (!this._autoria.parlamentares.length) {
       this._autoria.parlamentares = [{ ...parlamentarVazio }];
     }

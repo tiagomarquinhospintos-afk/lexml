@@ -1,4 +1,3 @@
-import { CmdEmdUtil } from '../../../emenda/comando-emenda-util';
 import { containsTags, converteIndicadorParaTexto, endsWithPunctuation, getTextoSemHtml, isValidHTML } from '../../../util/string-util';
 import { Artigo, Dispositivo } from '../../dispositivo/dispositivo';
 import { DescricaoSituacao } from '../../dispositivo/situacao';
@@ -299,12 +298,6 @@ export const validaTextoDispositivo = (dispositivo: Dispositivo): Mensagem[] => 
   ) {
     const dispositivos = [] as any;
     dispositivos.push(dispositivo);
-
-    if (CmdEmdUtil.verificaNecessidadeRenumeracaoRedacaoFinal(dispositivos)) {
-      if (localStorage.getItem('naoMostrarExplicacaoSufixo') === null) {
-        addMensagem(mensagens, TipoMensagem.WARNING, `Como interpretar sufixos (-1, -2,...)?`, undefined, 'onmodalsufixos');
-      }
-    }
   }
 
   if (isBloqueado(dispositivo) && !isBloqueado(dispositivo.pai!)) {
