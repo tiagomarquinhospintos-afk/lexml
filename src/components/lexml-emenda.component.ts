@@ -915,7 +915,7 @@ export class LexmlEmendaComponent extends connect(rootStore)(LitElement) {
               <lexml-ajuda></lexml-ajuda>
             </sl-tab-panel>
             <sl-tab-panel name="atalhos" class="overflow-hidden">
-              <lexml-eta-emenda-atalhos></lexml-eta-emenda-atalhos>
+              <lexml-eta-atalhos></lexml-eta-atalhos>
             </sl-tab-panel>
           </sl-tab-group>
         </div>
