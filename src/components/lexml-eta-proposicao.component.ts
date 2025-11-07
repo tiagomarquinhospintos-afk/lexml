@@ -19,7 +19,7 @@ import { EditorComponent } from './editor/editor.component';
 export class LexmlEtaProposicaoComponent extends connect(rootStore)(LitElement) {
   @property({ type: Object }) lexmlEtaConfig: LexmlEtaConfig = new LexmlEtaConfig();
 
-  @query('lexml-eta-emenda-editor')
+  @query('lexml-eta-proposicao-editor')
   private editorComponent!: EditorComponent;
 
   private urn = '';

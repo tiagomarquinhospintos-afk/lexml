@@ -75,7 +75,7 @@ import { navegarEntreElementosAlteradosAction, TDirecao } from '../../model/lexm
 import { emendaDivididaDialog } from './emendaDivididaDialog';
 import { Anexo } from '../../model/emenda/emenda';
 
-@customElement('lexml-eta-emenda-editor')
+@customElement('lexml-eta-proposicao-editor')
 export class EditorComponent extends connect(rootStore)(LitElement) {
   @property({ type: Object }) lexmlEtaConfig: LexmlEtaConfig = new LexmlEtaConfig();
 
@@ -179,7 +179,7 @@ export class EditorComponent extends connect(rootStore)(LitElement) {
           --lx-eta-editor-overflow: display;
         }
 
-        lexml-eta-emenda-editor .ql-editor {
+        lexml-eta-proposicao-editor .ql-editor {
           white-space: normal;
         }
 

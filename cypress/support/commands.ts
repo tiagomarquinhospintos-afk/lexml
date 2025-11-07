@@ -163,7 +163,7 @@ Cypress.Commands.add('focusOnConteudo', { prevSubject: 'element' }, (subject: JQ
 Cypress.Commands.add('alterarTextoDoDispositivo', { prevSubject: 'element' }, (subject: JQuery<HTMLElement>, texto: string): Cypress.Chainable<JQuery<HTMLElement>> => {
   const wrapSubject = cy.wrap(subject);
   wrapSubject.find('div.container__texto p.texto__dispositivo').invoke('text', texto);
-  wrapSubject.closest('lexml-eta-emenda-editor').then($eta => {
+  wrapSubject.closest('lexml-eta-proposicao-editor').then($eta => {
     const eta = $eta[0];
     (eta as any).emitirEventoOnChange('cypress');
   });
