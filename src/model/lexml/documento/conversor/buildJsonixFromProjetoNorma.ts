@@ -74,7 +74,10 @@ const montaParteInicial = (projetoNorma: any): any => {
     preambulo: {
       TYPE_NAME: 'br_gov_lexml__1.TextoType',
       id: 'preambulo',
-      p: projetoNorma.preambulo ? buildContent(projetoNorma.preambulo) : [],
+      p: {
+        TYPE_NAME: 'br_gov_lexml__1.GenInline',
+        content: projetoNorma.preambulo ? [buildContent(projetoNorma.preambulo)] : [],
+      },
     },
   };
 };
@@ -200,9 +203,10 @@ const buildContent = (dispositivo: Dispositivo): any[] => {
   const regex = /<a[^>]+href="(.*?)"[^>]*>(.*?)<\/a>/gi;
   const result: any[] = [];
 
-  const ocorrencias = dispositivo.texto.match(regex);
+  const ocorrencias = dispositivo.texto?.match(regex);
 
-  if (!ocorrencias) {
+  if (!dispositivo.texto) result.push(dispositivo);
+  else if (!ocorrencias) {
     const fim = dispositivo.texto.indexOf('” (NR)');
     result.push(dispositivo.texto.substring(0, fim === -1 ? undefined : fim));
   } else if (!dispositivo.texto.startsWith(ocorrencias[0])) {
