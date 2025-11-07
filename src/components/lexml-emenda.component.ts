@@ -865,7 +865,7 @@ export class LexmlEmendaComponent extends connect(rootStore)(LitElement) {
               </div>
             </sl-tab-panel>
             <sl-tab-panel name="avisos" class="overflow-hidden">
-              <lexml-eta-emenda-alertas></lexml-eta-emenda-alertas>
+              <lexml-eta-alertas></lexml-eta-alertas>
             </sl-tab-panel>
           </sl-tab-group>
         </div>
