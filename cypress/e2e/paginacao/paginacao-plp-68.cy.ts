@@ -5,7 +5,7 @@ describe('Testando paginação com PLP 68/2024', () => {
       modoEmendaSelectValue: 'emenda',
     });
 
-    cy.get('emenda-dividida-modal')
+    cy.get('proposicao-dividida-modal')
       .shadow()
       .find('sl-dialog')
       .find('sl-button')

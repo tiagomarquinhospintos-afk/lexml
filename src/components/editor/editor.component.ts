@@ -72,7 +72,7 @@ import { SufixosModalComponent } from '../sufixos/sufixos.modal.componet';
 import { getElementos } from '../../model/elemento/elementoUtil';
 import { selecionarPaginaArticulacaoAction } from '../../model/lexml/acao/selecionarPaginaArticulacaoAction';
 import { navegarEntreElementosAlteradosAction, TDirecao } from '../../model/lexml/acao/navegarEntreElementosAlteradosAction';
-import { emendaDivididaDialog } from './emendaDivididaDialog';
+import { ProposicaoDivididaDialog } from './proposicaoDivididaDialog';
 import { Anexo } from '../../model/emenda/emenda';
 
 @customElement('lexml-eta-proposicao-editor')
@@ -94,8 +94,8 @@ export class EditorComponent extends connect(rootStore)(LitElement) {
   @query('#btnRejeitarTodasRevisoes')
   private btnRejeitarTodasRevisoes!: HTMLButtonElement;
 
-  @query('emenda-dividida-modal')
-  private emendaDivididaDialog!: emendaDivididaDialog;
+  @query('proposicao-dividida-modal')
+  private proposicaoDivididaDialog!: ProposicaoDivididaDialog;
 
   private modo = ClassificacaoDocumento.PROJETO;
 
@@ -281,7 +281,7 @@ export class EditorComponent extends connect(rootStore)(LitElement) {
       <lexml-ajuda-modal></lexml-ajuda-modal>
       <lexml-atalhos-modal></lexml-atalhos-modal>
       <lexml-sufixos-modal></lexml-sufixos-modal>
-      <emenda-dividida-modal></emenda-dividida-modal>
+      <proposicao-dividida-modal></proposicao-dividida-modal>
     `;
   }
 
@@ -641,7 +641,7 @@ export class EditorComponent extends connect(rootStore)(LitElement) {
     if (paginasArticulacao.length <= 1) {
       return;
     } else {
-      this.emendaDivididaDialog.show();
+      this.proposicaoDivididaDialog.show();
     }
 
     // Cria elemento select para escolher a página
