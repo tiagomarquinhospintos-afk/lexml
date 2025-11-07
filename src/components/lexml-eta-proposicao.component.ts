@@ -39,7 +39,7 @@ export class LexmlEtaProposicaoComponent extends connect(rootStore)(LitElement) 
       this.projetoNorma = params.projetoNorma;
     }
     this.loadProjetoNorma(params);
-    document.querySelector('lexml-eta-emenda-articulacao')!['style'].display = 'block';
+    document.querySelector('lexml-eta-articulacao')!['style'].display = 'block';
   }
 
   setDispositivosERevisoesEmenda(revisoes?: Revisao[]): void {
@@ -92,19 +92,19 @@ export class LexmlEtaProposicaoComponent extends connect(rootStore)(LitElement) 
           display: block;
         }
 
-        lexml-eta-emenda-articulacao {
+        lexml-eta-articulacao {
           display: none;
           height: 100%;
         }
 
-        lexml-eta-emenda-articulacao:focus {
+        lexml-eta-articulacao:focus {
           outline: 0;
           border: 0px solid #f1f1f1;
           -webkit-box-shadow: 0px;
           box-shadow: none;
         }
       </style>
-      <lexml-eta-emenda-articulacao .lexmlEtaConfig=${this.lexmlEtaConfig}></lexml-eta-emenda-articulacao>
+      <lexml-eta-articulacao .lexmlEtaConfig=${this.lexmlEtaConfig}></lexml-eta-articulacao>
     `;
   }
 }
