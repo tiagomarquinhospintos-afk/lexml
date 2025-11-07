@@ -1,8 +1,7 @@
 import { PL_5008_2023 } from '../doc/pl_5008_2023';
-import { LexmlEmendaConfig } from '../../src';
 import { html, LitElement, TemplateResult } from 'lit';
 import { customElement, query, state } from 'lit/decorators.js';
-import { LexmlEmendaComponent, LexmlEmendaParametrosEdicao } from '../../src/components/lexml-emenda.component';
+import { LexmlEmendaConfig, LexmlEmendaComponent, LexmlEtaParametrosEdicao, Usuario } from '../../src';
 import { RefProposicaoEmendada } from '../../src/model/emenda/emenda';
 import { COD_CIVIL_COMPLETO } from '../doc/codigocivil_completo';
 import { COD_CIVIL_PARCIAL1 } from '../doc/codigocivil_parcial1';
@@ -17,7 +16,6 @@ import { MPV_1160_2023 } from '../doc/mpv_1160_2023';
 import { PLC_ARTIGOS_AGRUPADOS } from '../doc/plc_artigos_agrupados';
 import { PL_AGRUPADORES } from '../doc/pl_agrupadores';
 import { getAno, getNumero, getSigla } from '../../src/model/lexml/documento/urnUtil';
-import { Usuario } from '../../src/model/revisao/usuario';
 import { PDL_343_2023 } from '../doc/pdl_343_2023';
 import { PEC_48_2023 } from '../doc/pec_48_2023';
 import { PLC_142_2028 } from '../doc/plc_142_2028';
@@ -170,7 +168,7 @@ export class DemoView extends LitElement {
     this.elLexmlEmenda.style.display = 'none';
     this.projetoNorma = {};
 
-    const params = new LexmlEmendaParametrosEdicao();
+    const params = new LexmlEtaParametrosEdicao();
     params.projetoNorma = this.projetoNorma;
     this.elLexmlEmenda.inicializarEdicao(params);
 
@@ -193,7 +191,7 @@ export class DemoView extends LitElement {
         this.projetoNorma = this.elDocumento.value.indexOf('sem_texto') >= 0 ? null : { ...mapProjetosNormas[this.elDocumento.value] };
 
         if (this.elLexmlEmenda) {
-          const params = new LexmlEmendaParametrosEdicao();
+          const params = new LexmlEtaParametrosEdicao();
           params.configuracaoPaginacao = mapConfiguracaoPaginacaoDispositivos[this.elDocumento.value];
           params.dispositivosBloqueados = mapDispositivosBloqueados[this.elDocumento.value];
 
@@ -258,7 +256,7 @@ export class DemoView extends LitElement {
           const proposicao = JSON.parse(e.target.result as string);
           this.projetoNorma = proposicao.projetoNorma;
 
-          const params = new LexmlEmendaParametrosEdicao();
+          const params = new LexmlEtaParametrosEdicao();
           params.projetoNorma = this.projetoNorma;
           params.proposicao = proposicao;
           this.elLexmlEmenda.inicializarEdicao(params);

@@ -1,6 +1,5 @@
 /// <reference types="cypress" />
-import { Emenda, ModoEdicaoEmenda } from '../../src/model/emenda/emenda';
-import { removeAllHtmlTags } from '../../src/util/string-util';
+import { Emenda } from '../../src/model/emenda/emenda';
 
 // ***********************************************
 // This example commands.ts shows you how to
@@ -61,8 +60,6 @@ export interface ChecarEstadoInicialAoCriarNovaEmenda {
 
 const tempoDeEsperaPadrao = 100;
 const tempoDeEsperaMaior = 1000;
-
-const regexEspaco = /\s+|&nbsp;/g;
 
 Cypress.Commands.add('ignorarErro', (text: string) => {
   Cypress.on('uncaught:exception', err => {
@@ -266,8 +263,6 @@ Cypress.Commands.add('checarEstadoInicialAoCriarNovaEmendaEstruturada', (payload
   // editor-texto-rico deve existir e estar oculto
   cy.get('editor-texto-rico[modo="textoLivre"]').should('exist').should('have.attr', 'style', 'display: none');
 
-  cy.get('lexml-emenda-comando').should('exist');
-
   payload.totalElementos && cy.get('div.container__elemento').should('have.length', payload.totalElementos);
 });
 
@@ -287,196 +282,6 @@ Cypress.Commands.add('checarEstadoInicialAoCriarNovaEmendaPadrao', (payload: Che
   // Dispositivo "ementa" deve estar "ativo"
   cy.get('div.ementa.container__elemento--ativo').should('exist');
 });
-
-Cypress.Commands.add('checarDadosAposAbrirEmenda', (payload: ChecarDadosAposAbrirEmendaPayloadCypress) => {
-  const emenda = payload.emenda;
-  fnChecarTituloMpv(emenda);
-  emenda.modoEdicao === ModoEdicaoEmenda.EMENDA && fnChecarEmentaMpv(emenda);
-  fnChecarDadosEmendaAbaTexto(emenda);
-  fnChecarDadosEmendaAbaJustificativa(emenda);
-  fnChecarDadosEmendaAbaAutoria(emenda);
-  emenda.modoEdicao !== ModoEdicaoEmenda.EMENDA_TEXTO_LIVRE && fnChecarDadosEmendaLateralComando(emenda);
-  fnChecarDadosNotasRodape(emenda);
-  cy.get('#sl-tab-1').click();
-});
-
-const fnChecarTituloMpv = (emenda: Emenda): void => {
-  const pr = emenda.proposicao;
-  cy.get('.nome-proposicao').contains(`${pr.sigla} ${pr.numero}/${pr.ano}`);
-};
-
-const fnChecarEmentaMpv = (emenda: Emenda): void => {
-  // Verifica se o texto do elemento com classe 'ementa' contém a ementa da proposição
-  cy.get('.ementa')
-    .invoke('text')
-    .then(texto => {
-      expect(texto.replace(/ /g, '')).to.contain(emenda.proposicao.ementa.replace(/ /g, ''));
-    });
-};
-
-const fnChecarDadosEmendaAbaTexto = (emenda: Emenda): void => {
-  // TODO: Verificar outros modos de edição
-
-  // Verificar modoEdicao. Testar de acordo com o modo.
-  emenda.modoEdicao === ModoEdicaoEmenda.EMENDA && fnChecarDadosEmendaAbaTextoEmendaPadrao();
-  emenda.modoEdicao === ModoEdicaoEmenda.EMENDA_ARTIGO_ONDE_COUBER && fnChecarDadosEmendaAbaTextoEmendaArtigoOndeCouber(emenda);
-  emenda.modoEdicao === ModoEdicaoEmenda.EMENDA_TEXTO_LIVRE && fnChecarDadosEmendaAbaTextoEmendaTextoLivre();
-};
-
-const fnChecarDadosEmendaAbaTextoEmendaPadrao = (): void => {
-  cy.get('div.container__elemento.elemento-tipo-artigo').should('have.length.greaterThan', 0);
-};
-
-const fnChecarDadosEmendaAbaTextoEmendaArtigoOndeCouber = (emenda: Emenda): void => {
-  cy.get('div.container__elemento.elemento-tipo-artigo  div.container__texto--nivel0').should('have.length', emenda.componentes[0].dispositivos.dispositivosAdicionados.length);
-
-  emenda.componentes[0].dispositivos.dispositivosAdicionados.forEach((da, index) => {
-    const textoDoCaputDoArtigo = removeAllHtmlTags(da.filhos?.find(f => f.tipo === 'Caput')?.texto ?? '').replace(regexEspaco, '');
-    cy.get('div.container__elemento.elemento-tipo-artigo')
-      .eq(index)
-      .find('div.container__texto p.texto__dispositivo')
-      .then($p => {
-        expect($p.text().replace(regexEspaco, '')).equal(textoDoCaputDoArtigo);
-      });
-  });
-};
-
-const fnChecarDadosEmendaAbaTextoEmendaTextoLivre = (): void => {
-  cy.get('editor-texto-rico[modo="textoLivre"]').should('exist').should('have.attr', 'style', 'display: block');
-};
-
-const fnChecarDadosEmendaAbaJustificativa = (emenda: Emenda): void => {
-  const justificativa = removeAllHtmlTags(emenda.justificativa ?? '').replace(regexEspaco, '');
-  cy.get('#sl-tab-2').click();
-  cy.get('#editor-texto-rico-justificativa-inner > .ql-editor').then($el => {
-    expect($el.text().replace(regexEspaco, '')).equal(justificativa);
-  });
-};
-
-const fnGetArrayNomeComissao = (emenda: Emenda): string[] => {
-  if (emenda.proposicao.sigla === 'MPV') {
-    if (emenda.colegiadoApreciador.siglaComissao === 'CMO') {
-      return [`CMO - Comissão Mista de Planos, Orçamentos Públicos e Fiscalização`];
-    } else {
-      const nomeEstendido = `${emenda.colegiadoApreciador.siglaComissao} - Comissão Mista da Medida Provisória n° ${emenda.proposicao.numero}, de ${emenda.proposicao.ano}`;
-      return [`${emenda.colegiadoApreciador.siglaComissao}`, nomeEstendido, nomeEstendido.toUpperCase()];
-    }
-  }
-
-  return [`${emenda.colegiadoApreciador.siglaComissao}`];
-};
-
-const fnChecarDadosEmendaAbaAutoria = (emenda: Emenda): void => {
-  // Verificar o clique na aba Destino, Data, Autoria e Impressão
-  cy.get('#sl-tab-3').click();
-
-  // Verificar a seleção do tipo Órgão destino
-  cy.get('lexml-destino').shadow().find('sl-radio-group#tipoColegiado').find('sl-radio').contains(emenda.colegiadoApreciador.tipoColegiado).should('have.attr', 'checked');
-
-  // Verificar o preenchimento do nome do Órgão destino
-  cy.get('lexml-destino')
-    .shadow()
-    .find('autocomplete-async')
-    .should($el => {
-      expect(fnGetArrayNomeComissao(emenda)).to.include($el[0].value);
-    });
-
-  // Verificar a seleção do radio Data e o preenchimento do valor
-  if (emenda.data) {
-    cy.get('lexml-data').shadow().find('sl-radio[value="1"]').should('not.have.attr', 'checked');
-    cy.get('lexml-data').shadow().find('sl-radio[value="2"]').should('have.attr', 'checked');
-    cy.get('lexml-data').shadow().find('sl-radio[value="2"] sl-input#input-data').should('have.value', emenda.data);
-  } else {
-    cy.get('lexml-data').shadow().find('sl-radio[value="1"]').should('have.attr', 'checked');
-    cy.get('lexml-data').shadow().find('sl-radio[value="2"]').should('not.have.attr', 'checked');
-  }
-
-  // Verificar o preenchimento dos campos da seção Autoria
-  // Verificar o preenchimento do campo Parlamentar e Cargo
-  const sParlamentares = emenda.autoria.parlamentares.map(p => `${p.nome} - ${p.cargo ?? ''}`).join('; ');
-  cy.get('lexml-autoria')
-    .shadow()
-    .find('div.autoria-grid:not(.autoria-labels)')
-    .then($divs => {
-      const sParlamentaresAux = $divs.map((index, div) => {
-        const nome = div.querySelector('lexml-autocomplete')?.value;
-        const cargo = (div.querySelector('sl-input#tex-cargo') as any)?.value;
-        return nome ? `${nome} - ${cargo}` : '';
-      });
-
-      expect(sParlamentaresAux.get().join('; ')).equal(sParlamentares);
-    });
-
-  // Verificar o preenchimento do campo Quantidade de assinaturas adicionais de Senadores
-  cy.get('lexml-autoria').shadow().find('#num-assinaturas-adicionais-senadores').should('have.value', emenda.autoria.quantidadeAssinaturasAdicionaisSenadores);
-
-  // Verificar o preenchimento do campo Quantidade de assinaturas adicionais de Deputados Federais
-  cy.get('lexml-autoria').shadow().find('#num-assinaturas-adicionais-deputados').should('have.value', emenda.autoria.quantidadeAssinaturasAdicionaisDeputados);
-
-  // Verificar o checkbox de imprimir partido e UF para os signatários
-  cy.get('lexml-autoria')
-    .shadow()
-    .find('input#chk-exibir-partido-uf')
-    .should((emenda.autoria.imprimirPartidoUF ? '' : 'not.') + 'have.attr', 'checked');
-
-  // Verificar o preenchimento dos campos da seção Opções de impressão
-  // Verificar a seleção de imprimir brasão
-  cy.get('lexml-opcoes-impressao')
-    .shadow()
-    .find('input#chk-imprimir-brasao')
-    .should((emenda.opcoesImpressao.imprimirBrasao ? '' : 'not.') + 'have.attr', 'checked');
-
-  // Verificar a seleção do campo tamanho da letra
-  cy.get('lexml-opcoes-impressao')
-    .shadow()
-    .find('sl-select#select-tamanho-fonte')
-    .should('have.value', emenda.opcoesImpressao.tamanhoFonte ?? '');
-
-  // Verificar a seleção de reduzir espaçamento entre linhas
-  cy.get('lexml-opcoes-impressao')
-    .shadow()
-    .find('input#chk-reduzir-espaco')
-    .should((emenda.opcoesImpressao.reduzirEspacoEntreLinhas ? '' : 'not.') + 'have.attr', 'checked');
-};
-
-const fnChecarDadosEmendaLateralComando = (emenda: any): void => {
-  fnChecarComandoCabecalho(emenda);
-  fnChecarComandoCitacao(emenda);
-};
-
-const fnChecarComandoCabecalho = (emenda: any): void => {
-  const cabecalho = emenda.comandoEmenda.comandos[0].cabecalho;
-  cy.get('lexml-emenda-comando').shadow().find('div.lexml-emenda-comando').find('div.lexml-emenda-cabecalhoComando').contains(cabecalho);
-};
-
-const fnChecarComandoCitacao = (emenda: any): void => {
-  const citacao = emenda.comandoEmenda.comandos[0].citacao;
-  cy.get('lexml-emenda lexml-emenda-comando')
-    .shadow()
-    .find('div.lexml-emenda-comando')
-    .find('div.lexml-emenda-citacaoComando')
-    .then(div => {
-      const aux = citacao
-        .replace(/<\/?[^>]*>?/g, '')
-        .replaceAll(regexEspaco, ' ')
-        .trim();
-      const innerHTML = div[0].innerHTML
-        .replace(/<\/?[^>]*>?/g, '')
-        .replace(regexEspaco, ' ')
-        .replace('...............................................', '')
-        .trim();
-
-      expect(innerHTML).equal(aux);
-    });
-};
-
-const fnChecarDadosNotasRodape = (emenda: Emenda): void => {
-  const textoNotaRodape = emenda.notasRodape[0]?.texto;
-  if (textoNotaRodape) {
-    cy.get('#sl-tab-14 > #badgeAtalhos').click();
-    cy.get('.notas-texto > p').contains(textoNotaRodape);
-  }
-};
 
 declare global {
   // eslint-disable-next-line @typescript-eslint/no-namespace

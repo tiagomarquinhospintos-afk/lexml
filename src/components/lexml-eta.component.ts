@@ -13,7 +13,7 @@ import { DispositivosEmenda } from './../model/emenda/emenda';
 import { rootStore } from './../redux/store';
 import { LexmlEmendaConfig } from '../model/lexmlEmendaConfig';
 import { Revisao } from '../model/revisao/revisao';
-import { LexmlEmendaParametrosEdicao } from './lexml-emenda.component';
+import { LexmlEtaParametrosEdicao } from './lexml-emenda.component';
 import { EditorComponent } from './editor/editor.component';
 
 @customElement('lexml-eta-emenda')
@@ -34,7 +34,7 @@ export class LexmlEtaComponent extends connect(rootStore)(LitElement) {
     return this;
   }
 
-  inicializarEdicao(urn: string, params?: LexmlEmendaParametrosEdicao): void {
+  inicializarEdicao(urn: string, params?: LexmlEtaParametrosEdicao): void {
     this.urn = urn;
     if (params?.projetoNorma) {
       this.projetoNorma = params.projetoNorma;
@@ -65,7 +65,7 @@ export class LexmlEtaComponent extends connect(rootStore)(LitElement) {
     this.editorComponent.atualizaAnexo(anexos);
   }
 
-  private loadProjetoNorma(params?: LexmlEmendaParametrosEdicao): void {
+  private loadProjetoNorma(params?: LexmlEtaParametrosEdicao): void {
     if (!this.projetoNorma || !this.projetoNorma.value) {
       this.projetoNorma = DOCUMENTO_PADRAO;
     }

@@ -51,7 +51,7 @@ type TipoCasaLegislativa = 'SF' | 'CD' | 'CN';
 /**
  * Parâmetros de inicialização de edição de documento
  */
-export class LexmlEmendaParametrosEdicao {
+export class LexmlEtaParametrosEdicao {
   // Identificação da proposição (texto).
   // Opcional se for informada a proposicao ou o projetoNorma
   urn = '';
@@ -287,7 +287,7 @@ export class LexmlEmendaComponent extends connect(rootStore)(LitElement) {
     return revisoes;
   }
 
-  async inicializarEdicao(params: LexmlEmendaParametrosEdicao) {
+  async inicializarEdicao(params: LexmlEtaParametrosEdicao) {
     try {
       this.projetoNorma = params.projetoNorma;
       this.isMateriaOrcamentaria = params.isMateriaOrcamentaria || (!!params.proposicao && params.proposicao.colegiadoApreciador?.siglaComissao === 'CMO');
@@ -336,7 +336,7 @@ export class LexmlEmendaComponent extends connect(rootStore)(LitElement) {
     }
   }
 
-  private inicializaCasaLegislativa(siglaProposicao: string, params: LexmlEmendaParametrosEdicao): TipoCasaLegislativa {
+  private inicializaCasaLegislativa(siglaProposicao: string, params: LexmlEtaParametrosEdicao): TipoCasaLegislativa {
     if (['MPV', 'PDN', 'PRN'].indexOf(siglaProposicao) > -1) {
       return 'CN';
     }
@@ -344,7 +344,7 @@ export class LexmlEmendaComponent extends connect(rootStore)(LitElement) {
     return (params.proposicao ? params.proposicao.colegiadoApreciador?.siglaCasaLegislativa : params.casaLegislativa) || 'CN';
   }
 
-  private inicializaProposicao(params: LexmlEmendaParametrosEdicao): void {
+  private inicializaProposicao(params: LexmlEtaParametrosEdicao): void {
     this.urn = '';
 
     if (params.proposicao) {
@@ -421,7 +421,7 @@ export class LexmlEmendaComponent extends connect(rootStore)(LitElement) {
     this._lexmlEta!.setDispositivosERevisoesEmenda(proposicao.revisoes);
   }
 
-  private resetaProposicao(params: LexmlEmendaParametrosEdicao): void {
+  private resetaProposicao(params: LexmlEtaParametrosEdicao): void {
     const proposicao = new Proposicao();
     // emenda.proposicao = this.montarProposicaoPorUrn(this.urn, params.ementa);
     proposicao.autoria = this.montarAutoriaPadrao(params);
@@ -431,7 +431,7 @@ export class LexmlEmendaComponent extends connect(rootStore)(LitElement) {
     rootStore.dispatch(limparRevisaoAction.execute());
   }
 
-  private montarAutoriaPadrao(params: LexmlEmendaParametrosEdicao): Autoria {
+  private montarAutoriaPadrao(params: LexmlEtaParametrosEdicao): Autoria {
     const autoria = new Autoria();
     if (params.autoriaPadrao?.identificacao) {
       const autoriaPadrao = params.autoriaPadrao;
@@ -445,7 +445,7 @@ export class LexmlEmendaComponent extends connect(rootStore)(LitElement) {
     return autoria;
   }
 
-  private montarOpcoesImpressaoPadrao(params: LexmlEmendaParametrosEdicao): OpcoesImpressao {
+  private montarOpcoesImpressaoPadrao(params: LexmlEtaParametrosEdicao): OpcoesImpressao {
     const opcoesImpressao = new OpcoesImpressao();
     if (params.opcoesImpressaoPadrao) {
       opcoesImpressao.imprimirBrasao = params.opcoesImpressaoPadrao.imprimirBrasao;

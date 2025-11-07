@@ -5,7 +5,7 @@ import { buildProjetoNormaFromJsonix } from '../../../src/model/lexml/documento/
 import { elementoReducer } from '../../../src/redux/elemento/reducer/elementoReducer';
 import { ClassificacaoDocumento } from '../../../src/model/documento/classificacao';
 import { ABRIR_ARTICULACAO } from '../../../src/model/lexml/acao/openArticulacaoAction';
-import { LexmlEmendaParametrosEdicao } from '../../../src';
+import { LexmlEtaParametrosEdicao } from '../../../src';
 import {
   buscaDispositivoById,
   getDispositivoAndFilhosAsLista,
@@ -27,7 +27,7 @@ import { TEXTO_012 } from '../../doc/textos-colar/texto_012';
 
 let state: State;
 
-const params = new LexmlEmendaParametrosEdicao();
+const params = new LexmlEtaParametrosEdicao();
 params.dispositivosBloqueados = [
   'art1',
   'art2_par1',
