@@ -12,7 +12,7 @@ import { DOCUMENTO_PADRAO } from '../model/lexml/documento/modelo/documentoPadra
 import { rootStore } from '../redux/store';
 import { LexmlEtaConfig } from '../model/lexmlEtaConfig';
 import { Revisao } from '../model/revisao/revisao';
-import { LexmlEtaParametrosEdicao } from './lexml-emenda.component';
+import { LexmlEtaParametrosEdicao } from './lexml-eta.component';
 import { EditorComponent } from './editor/editor.component';
 
 @customElement('lexml-eta-proposicao')
@@ -72,7 +72,7 @@ export class LexmlEtaProposicaoComponent extends connect(rootStore)(LitElement) 
     const documento = buildProjetoNormaFromJsonix(this.projetoNorma, false);
     documento.urn = this.urn;
 
-    document.querySelector('lexml-emenda')?.querySelector('sl-tab')?.click();
+    document.querySelector('lexml-eta')?.querySelector('sl-tab')?.click();
     rootStore.dispatch(openArticulacaoAction(documento.articulacao!, 'edicao', params));
   }
 

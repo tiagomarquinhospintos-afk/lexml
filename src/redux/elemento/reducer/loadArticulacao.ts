@@ -1,5 +1,5 @@
 import { configurarPaginacao } from '../util/paginacaoUtil';
-import { DispositivoBloqueado, LexmlEtaParametrosEdicao } from '../../../components/lexml-emenda.component';
+import { DispositivoBloqueado, LexmlEtaParametrosEdicao } from '../../../components/lexml-eta.component';
 import { Articulacao } from '../../../model/dispositivo/dispositivo';
 import { getElementos } from '../../../model/elemento/elementoUtil';
 import { buscaDispositivoById, getDispositivoAndFilhosAsLista } from '../../../model/lexml/hierarquia/hierarquiaUtil';

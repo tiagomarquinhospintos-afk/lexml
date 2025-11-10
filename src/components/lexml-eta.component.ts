@@ -30,7 +30,6 @@ import { limparRevisaoAction } from '../model/lexml/acao/limparRevisoes';
 import { buildContent, getUrn } from '../model/lexml/documento/conversor/buildProjetoNormaFromJsonix';
 import { generoFromLetra } from '../model/dispositivo/genero';
 import { Comissao } from './destino/comissao';
-import { SubstituicaoTermoComponent } from './substituicao-termo/substituicao-termo.component';
 import { NOTA_RODAPE_CHANGE_EVENT, NOTA_RODAPE_REMOVE_EVENT, NotaRodape } from './editor-texto-rico/notaRodape';
 import { unsafeHTML } from 'lit-html/directives/unsafe-html.js';
 import { DestinoComponent } from './destino/destino.component';
@@ -90,8 +89,8 @@ export class LexmlEtaParametrosEdicao {
   casaLegislativa?: TipoCasaLegislativa;
 }
 
-@customElement('lexml-emenda')
-export class LexmlEmendaComponent extends connect(rootStore)(LitElement) {
+@customElement('lexml-eta')
+export class LexmlEtaComponent extends connect(rootStore)(LitElement) {
   @property({ type: Boolean }) existeObserverEmenda = false;
   @property({ type: Number }) totalAlertas = 0;
   @property({ type: Boolean }) exibirAjuda = true;
@@ -122,12 +121,8 @@ export class LexmlEmendaComponent extends connect(rootStore)(LitElement) {
   @state()
   autoria = new Autoria();
 
-  @query('lexml-substituicao-termo')
-  _substituicaoTermo?: SubstituicaoTermoComponent;
   @query('lexml-eta-proposicao')
   _lexmlEta?: LexmlEtaProposicaoComponent;
-  @query('#editor-texto-rico-emenda')
-  _lexmlEmendaTextoRico;
   @query('#editor-texto-rico-justificativa')
   _lexmlJustificativa;
   @query('lexml-destino')
@@ -699,15 +694,6 @@ export class LexmlEmendaComponent extends connect(rootStore)(LitElement) {
           height: calc(var(--height) - 44px);
           overflow: var(--overflow);
         } */
-
-        #editor-texto-rico-emenda-inner {
-          height: calc(var(--heightJustificativa));
-          overflow: var(--overflow);
-        }
-        #editor-texto-rico-justificativa-inner {
-          height: calc(var(--heightJustificativa));
-          overflow: var(--overflow);
-        }
         .badge-pulse {
           margin-left: 7px;
           height: 16px;

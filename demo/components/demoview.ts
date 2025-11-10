@@ -1,7 +1,7 @@
 import { PL_5008_2023 } from '../doc/pl_5008_2023';
 import { html, LitElement, TemplateResult } from 'lit';
 import { customElement, query, state } from 'lit/decorators.js';
-import { LexmlEtaConfig, LexmlEmendaComponent, LexmlEtaParametrosEdicao, Usuario } from '../../src';
+import { LexmlEtaConfig, LexmlEtaComponent, LexmlEtaParametrosEdicao, Usuario } from '../../src';
 import { RefProposicaoEmendada } from '../../src/model/emenda/emenda';
 import { COD_CIVIL_COMPLETO } from '../doc/codigocivil_completo';
 import { COD_CIVIL_PARCIAL1 } from '../doc/codigocivil_parcial1';
@@ -108,8 +108,8 @@ export class DemoView extends LitElement {
   @query('#projetoNorma')
   private elDocumento!: HTMLSelectElement;
 
-  @query('lexml-emenda')
-  private elLexmlEmenda!: LexmlEmendaComponent;
+  @query('lexml-eta')
+  private elLexmlEmenda!: LexmlEtaComponent;
 
   @state() modo = 'edicao';
   @state() projetoNorma: any = {};
@@ -339,7 +339,7 @@ export class DemoView extends LitElement {
           width: 4rem;
           height: 1.5rem;
         }
-        lexml-emenda {
+        lexml-eta {
           display: none;
           outline: 0;
           border: 0;
@@ -390,7 +390,7 @@ export class DemoView extends LitElement {
         </div>
       </div>
       <div class="nome-proposicao">${this.proposicaoCorrente.sigla ? `${this.proposicaoCorrente.sigla} ${this.proposicaoCorrente.numero}/${this.proposicaoCorrente.ano}` : ''}</div>
-      <lexml-emenda .lexmlEmendaConfig=${this.emendaConfig} modo=${this.modo} @onrevisao=${this.onRevisao}></lexml-emenda>
+      <lexml-eta .lexmlEmendaConfig=${this.emendaConfig} modo=${this.modo} @onrevisao=${this.onRevisao}></lexml-eta>
     `;
   }
 

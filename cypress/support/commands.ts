@@ -255,7 +255,7 @@ Cypress.Commands.add('checarEstadoInicialAoCriarNovaEmendaEstruturada', (payload
   // Título da proposição
   cy.get('div.nome-proposicao').contains(payload.nomeProposicao).should('exist');
 
-  cy.get('lexml-emenda').should('exist');
+  cy.get('lexml-eta').should('exist');
 
   // lexml-eta deve existir e estar visível
   cy.get('lexml-eta-proposicao').should('exist').should('have.attr', 'style', 'display: block');
