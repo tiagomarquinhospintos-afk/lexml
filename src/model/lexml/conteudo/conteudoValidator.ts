@@ -102,7 +102,7 @@ export const validaTextoDispositivo = (dispositivo: Dispositivo): Mensagem[] => 
   // validações comuns a Artigo e Parágrafo
   //
   if (
-    (isArtigo(dispositivo) || isParagrafo(dispositivo)) &&
+    (isArtigo(dispositivo) || isParagrafo(dispositivo) || isEmenta(dispositivo)) &&
     dispositivo.texto &&
     dispositivo.texto.indexOf(TEXTO_OMISSIS) === -1 &&
     !/^[.]+$/.test(dispositivo.texto) &&
@@ -147,7 +147,7 @@ export const validaTextoDispositivo = (dispositivo: Dispositivo): Mensagem[] => 
   // Artigo e Parágrafo
   if (
     !isDispositivoAlteracao(dispositivo) &&
-    (isArtigo(dispositivo) || isParagrafo(dispositivo)) &&
+    (isArtigo(dispositivo) || isParagrafo(dispositivo) || isEmenta(dispositivo)) &&
     dispositivo.texto &&
     dispositivo.texto.indexOf(TEXTO_OMISSIS) === -1 &&
     !/^[.]+$/.test(dispositivo.texto) &&
@@ -333,5 +333,6 @@ const addMensagem = (mensagens: Mensagem[], tipo: TipoMensagem, descricao: strin
 };
 
 export const validaTexto = (dispositivo: Dispositivo): Mensagem[] => {
+  if (dispositivo.id === 'ementa') console.log('Ementa', isAgrupador(dispositivo), validaTextoAgrupador(dispositivo), validaTextoDispositivo(dispositivo));
   return isAgrupador(dispositivo) ? validaTextoAgrupador(dispositivo) : validaTextoDispositivo(dispositivo);
 };

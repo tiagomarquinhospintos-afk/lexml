@@ -1,11 +1,17 @@
 import { Elemento } from '../../model/elemento';
 import { EtaContainer } from './eta-container';
 
+const Break = Quill.import('blots/break');
+const Block = Quill.import('blots/block');
+const Text = Quill.import('blots/text');
+
 export class EtaContainerTdEsquerdo extends EtaContainer {
   static blotName = 'EtaContainerTdEsquerdo';
   static tagName = 'DIV';
   static className = 'container__texto';
   static classLevel = 'level';
+
+  static allowedChildren = [Block, Break, Text];
 
   get instanceBlotName(): string {
     return EtaContainerTdEsquerdo.blotName;

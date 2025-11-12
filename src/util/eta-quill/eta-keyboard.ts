@@ -347,7 +347,7 @@ export class EtaKeyboard extends Keyboard {
 
   private onTeclaBackspace(ev: KeyboardEvent): void {
     const range: RangeStatic = this.quill.getSelection(true);
-    if (!this.quill.linhaAtual.blotConteudo.html) {
+    if (!this.quill.linhaAtual.blotConteudo?.html) {
       cancelarPropagacaoDoEvento(ev);
       this.removeElementoSemTexto.notify(ev.key);
     } else if (!this.verificarOperacaoTecladoPermitida() || (range.index === this.quill.inicioConteudoAtual && range.length === 0)) {
