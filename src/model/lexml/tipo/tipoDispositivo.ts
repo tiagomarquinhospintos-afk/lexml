@@ -218,7 +218,7 @@ export const TipoDispositivo: Record<string, Tipo> = {
     tiposPermitidosPai: ['Articulacao'],
     tiposPermitidosFilhos: [],
     tipoProvavelFilho: undefined,
-    INDICADOR_SEQUENCIA: ['NA'],
+    INDICADOR_SEQUENCIA: ['.'],
     INDICADOR_FIM_SEQUENCIA: ['NA'],
     INDICADOR_DESDOBRAMENTO: ['NA'],
   },
