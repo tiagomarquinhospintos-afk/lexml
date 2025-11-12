@@ -233,6 +233,7 @@ export class LexmlEtaComponent extends connect(rootStore)(LitElement) {
     proposicao.epigrafe = this.getEpigrafe(proposicao.colegiadoApreciador, proposicao.urn);
 
     proposicao.colegiadoApreciador = this._lexmlDestino!.colegiadoApreciador;
+    proposicao.anexos = this._lexmlEta!.getAnexos();
     if (proposicao.colegiadoApreciador) proposicao.local = this.montarLocalFromColegiadoApreciador(proposicao.colegiadoApreciador);
 
     return proposicao;
@@ -414,6 +415,7 @@ export class LexmlEtaComponent extends connect(rootStore)(LitElement) {
     this._lexmlJustificativa.setContent(proposicao.justificativa, proposicao.notasRodape);
     this._lexmlData.data = proposicao.dataUltimaModificacao;
     this._lexmlEta!.setDispositivosERevisoesEmenda(proposicao.revisoes);
+    this._lexmlEta!.atualizaAnexos(proposicao.anexos || []);
   }
 
   private resetaProposicao(params: LexmlEtaParametrosEdicao): void {
