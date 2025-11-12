@@ -333,6 +333,5 @@ const addMensagem = (mensagens: Mensagem[], tipo: TipoMensagem, descricao: strin
 };
 
 export const validaTexto = (dispositivo: Dispositivo): Mensagem[] => {
-  if (dispositivo.id === 'ementa') console.log('Ementa', isAgrupador(dispositivo), validaTextoAgrupador(dispositivo), validaTextoDispositivo(dispositivo));
   return isAgrupador(dispositivo) ? validaTextoAgrupador(dispositivo) : validaTextoDispositivo(dispositivo);
 };
