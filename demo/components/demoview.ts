@@ -372,10 +372,10 @@ export class DemoView extends LitElement {
 
         <div class="lexml-eta-main-header--selecao">
           <select id="projetoNorma" @change=${this.onChangeDocumento}>
-            <option value="novo">Nova articulação</option>
+            <option value="novo" selected>Nova articulação</option>
             ${Object.keys(mapProjetosNormas)
               .filter(k => !k.startsWith('_'))
-              .map(k => html`<option value="${k}" ?selected=${k === 'plp_197_2023'}>${k.toUpperCase().replace(/_/, ' ').replace(/_/, ', de ')}</option>`)}
+              .map(k => html`<option value="${k}">${k.toUpperCase().replace(/_/, ' ').replace(/_/, ', de ')}</option>`)}
             <option value="_codcivil_completo">Código Civil Completo</option>
             <option value="_codcivil_parcial1">Código Civil (arts. 1 a 1023)</option>
             <option value="_codcivil_parcial2">Código Civil (arts. 1 a 388)</option>

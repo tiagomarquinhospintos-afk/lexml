@@ -335,12 +335,12 @@ export const isPrimeiroMesmoTipo = (dispositivo: Dispositivo): boolean => {
 };
 
 export const hasFilhos = (dispositivo: Dispositivo): boolean => {
-  return dispositivo.filhos && dispositivo.filhos.length > 0;
+  return dispositivo && dispositivo.filhos && dispositivo.filhos.length > 0;
 };
 
 export const getDispositivoAnterior = (dispositivo: Dispositivo): Dispositivo | undefined => {
   const pos = dispositivo.pai?.indexOf(dispositivo);
-  return pos && pos > 0 ? dispositivo.pai!.filhos[pos - 1] : undefined;
+  return pos && pos > 0 ? dispositivo.pai?.filhos[pos - 1] : undefined;
 };
 
 export const getDispositivoAnteriorMesmoTipo = (dispositivo: Dispositivo): Dispositivo | undefined => {

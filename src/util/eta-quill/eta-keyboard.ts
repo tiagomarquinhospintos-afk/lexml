@@ -43,6 +43,7 @@ export class EtaKeyboard extends Keyboard {
     });
 
     this.quill.root.addEventListener('keydown', (ev: KeyboardEvent): void => {
+      // console.log('ev.key', ev.key, ev.altKey, ev.metaKey, ev.ctrlKey);
       this.altGraphPressionado = ev.altKey && ev.location === 2;
       const elementoLinhaAtual = this.quill.linhaAtual?.elemento;
       if (!(this.quill.cursorDeTextoEstaSobreLink() || (ev.key === 'Backspace' && this.quill.cursorDeTextoEstaSobreLink(-1))) && this.isTeclaQueAlteraTexto(ev)) {
@@ -85,6 +86,7 @@ export class EtaKeyboard extends Keyboard {
       ) {
         cancelarPropagacaoDoEvento(ev);
       } else if (ev.ctrlKey) {
+        // console.log('ev.ctrlKey');
         if (!ev.altKey && !ev.metaKey) {
           if (['Delete', 'Backspace'].includes(ev.key) || (this.quill.linhaAtual.elemento.bloqueado && this.isNotTeclaAlteracaoExclusivaNoDispositivo(ev))) {
             cancelarPropagacaoDoEvento(ev);
@@ -107,6 +109,7 @@ export class EtaKeyboard extends Keyboard {
           }
         }
         if (ev.altKey || ev.metaKey) {
+          // console.log('ev.altKey || ev.metaKey');
           if (['o'].includes(ev.key.toLowerCase())) {
             this.onHotKeyTransformacaoTipo(ev);
           } else if (['n', '®'].includes(ev.key.toLowerCase())) {
@@ -150,8 +153,18 @@ export class EtaKeyboard extends Keyboard {
           }
         }
       } else if (ev.altKey) {
+        // console.log('ev.altKey ====>', ev.altKey, ev.key);
         if (ev.key === 'ArrowUp' || ev.key === 'ArrowDown') {
           this.onHotKeyMover(ev);
+        } else if (ev.key === 'Backspace') {
+          // console.log('test');
+          // console.log('this.checkContentForAltBackspace()', this.checkContentForAltBackspace());
+          if (this.checkContentForAltBackspace()) {
+            // this.quill.linhaAtual.blotConteudo.limparConteudo();
+            cancelarPropagacaoDoEvento(ev);
+          } else {
+            this.onTeclaBackspace(ev);
+          }
         }
       } else if (ev.key === 'ArrowRight') {
         this.onTeclaArrowRight(ev);
@@ -168,6 +181,7 @@ export class EtaKeyboard extends Keyboard {
       } else if (ev.key === 'Delete') {
         this.onTeclaDelete(ev);
       } else if (ev.key === 'Backspace') {
+        // console.log('backspace');
         this.onTeclaBackspace(ev);
       } else if (ev.key === 'Tab') {
         this.onTeclaTab(ev);
@@ -177,6 +191,19 @@ export class EtaKeyboard extends Keyboard {
     });
 
     super.listen();
+  }
+
+  private checkContentForAltBackspace(): boolean {
+    const content = this.quill.linhaAtual.blotConteudo?.html.replace(this.getTextAfterSelection(), '');
+    // console.log('content', content);
+    return content ? content.trim().split(' ')?.length === 1 : true;
+  }
+
+  private getTextAfterSelection(): string {
+    const posicao = this.quill.getSelection().index;
+    const [leaf, offset] = this.quill.getLeaf(posicao);
+
+    return leaf.text ? this.quill.getText(posicao, leaf.text.length - offset) : '';
   }
 
   private isNotTeclaAlteracaoExclusivaNoDispositivo(ev: KeyboardEvent): boolean {
