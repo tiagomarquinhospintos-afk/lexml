@@ -15,7 +15,7 @@ import { shoelaceLightThemeStyles } from '../assets/css/shoelace.theme.light.css
 import { adicionarAlerta } from '../model/alerta/acao/adicionarAlerta';
 import { removerAlerta } from '../model/alerta/acao/removerAlerta';
 import { Autoria, ColegiadoApreciador, Emenda, Epigrafe, Parlamentar, OpcoesImpressao } from '../model/emenda/emenda';
-import { buildFakeUrn, getAno, getNumero, getSigla, getTipo } from '../model/lexml/documento/urnUtil';
+import { buildFakeUrn, getAno, getNumero, getSigla } from '../model/lexml/documento/urnUtil';
 import { rootStore } from '../redux/store';
 import { ProjetoNorma } from './../model/lexml/documento/projetoNorma';
 import { LexmlEtaProposicaoComponent } from './lexml-eta-proposicao.component';
@@ -28,7 +28,6 @@ import { ativarDesativarRevisaoAction } from '../model/lexml/acao/ativarDesativa
 import { StateEvent, StateType } from '../redux/state';
 import { limparRevisaoAction } from '../model/lexml/acao/limparRevisoes';
 import { buildContent, getUrn } from '../model/lexml/documento/conversor/buildProjetoNormaFromJsonix';
-import { generoFromLetra } from '../model/dispositivo/genero';
 import { Comissao } from './destino/comissao';
 import { NOTA_RODAPE_CHANGE_EVENT, NOTA_RODAPE_REMOVE_EVENT, NotaRodape } from './editor-texto-rico/notaRodape';
 import { unsafeHTML } from 'lit-html/directives/unsafe-html.js';
@@ -228,7 +227,7 @@ export class LexmlEtaComponent extends connect(rootStore)(LitElement) {
     proposicao.revisoes = this.getRevisoes();
     proposicao.justificativaAntesRevisao = this._lexmlJustificativa.textoAntesRevisao;
     proposicao.pendenciasPreenchimento = this.getPendenciasPreenchimentoEmenda(proposicao);
-    proposicao.epigrafe = this.getEpigrafe(proposicao.colegiadoApreciador, proposicao.urn);
+    proposicao.epigrafe = this.getEpigrafe(this.projetoNorma);
 
     proposicao.colegiadoApreciador = this._lexmlDestino!.colegiadoApreciador;
     proposicao.anexos = this._lexmlEta!.getAnexos();
@@ -237,16 +236,10 @@ export class LexmlEtaComponent extends connect(rootStore)(LitElement) {
     return proposicao;
   }
 
-  getEpigrafe(colegiadoApreciador: ColegiadoApreciador, urn: string): Epigrafe {
+  getEpigrafe(projetoNorma: any): Epigrafe {
     const epigrafe = new Epigrafe();
-    epigrafe.texto =
-      'EMENDA Nº         ' +
-      (colegiadoApreciador && colegiadoApreciador.tipoColegiado !== 'Plenário' && colegiadoApreciador.siglaComissao ? `- ${colegiadoApreciador.siglaComissao}` : '');
-
-    const generoProposicao = generoFromLetra(getTipo(urn).genero);
-    const inicioEpigrafe = this.emendarTextoSubstitutivo ? '(ao substitutivo ' : '(';
-
-    epigrafe.complemento = `${inicioEpigrafe}${generoProposicao.artigoDefinidoPrecedidoPreposicaoASingular.trim()} ${getSigla(urn)} ${getNumero(urn)}/${getAno(urn)})`;
+    const doc = projetoNorma.value.projetoNorma.norma || projetoNorma.value.projetoNorma.projeto;
+    epigrafe.texto = doc.parteInicial?.epigrafe.content[0];
 
     return epigrafe;
   }
