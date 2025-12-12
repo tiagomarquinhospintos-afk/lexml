@@ -1,6 +1,6 @@
 import { isDispositivoAlteracao, isUltimaAlteracao, getDispositivoCabecaAlteracao, isDispositivoCabecaAlteracao } from './../../hierarquia/hierarquiaUtil';
 import { Articulacao, Artigo, Dispositivo } from '../../../dispositivo/dispositivo';
-import { isAgrupador, isArtigo, isCaput, isOmissis } from '../../../dispositivo/tipo';
+import { isAgrupador, isArtigo, isCaput, isIncisoCaput, isOmissis } from '../../../dispositivo/tipo';
 import { TEXTO_OMISSIS } from '../../conteudo/textoOmissis';
 import { buildHref, buildId, buildIdAlteracao } from '../../util/idUtil';
 import { isNorma, ProjetoNorma } from '../projetoNorma';
@@ -169,7 +169,16 @@ const buildNode = (dispositivo: Dispositivo): any => {
 };
 
 const buildDispositivo = (dispositivo: Dispositivo, value: any): void => {
-  value['href'] = isCaput(dispositivo) ? buildHref(dispositivo.pai!) + '_' + buildHref(dispositivo) : buildHref(dispositivo);
+  if (dispositivo.tipo === 'Artigo') return;
+
+  /* eslint-disable prettier/prettier */
+  value['href'] =
+    isCaput(dispositivo) && !isIncisoCaput(dispositivo)
+      ? buildHref(dispositivo.pai!) + '_' + buildHref(dispositivo)
+      : dispositivo.href !== undefined
+      ? dispositivo.href
+      : buildHref(dispositivo);
+  /* eslint-enable prettier/prettier */
 
   value['id'] = buildId(dispositivo);
 
