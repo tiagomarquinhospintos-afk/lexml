@@ -159,7 +159,7 @@ const buildNode = (dispositivo: Dispositivo): any => {
       string: `{http://www.lexml.gov.br/1.0}${dispositivo.tipo}`,
     },
     value: {
-      TYPE_NAME: 'br_gov_lexml__1.DispositivoType',
+      TYPE_NAME: dispositivo.tipo === 'Omissis' ? 'br_gov_lexml__1.Omissis' : 'br_gov_lexml__1.DispositivoType',
     },
   };
 
