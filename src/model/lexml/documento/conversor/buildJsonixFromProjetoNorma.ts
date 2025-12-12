@@ -205,7 +205,7 @@ const buildContent = (dispositivo: Dispositivo): any[] => {
 
   const ocorrencias = dispositivo.texto?.match(regex);
 
-  if (!dispositivo.texto) result.push(dispositivo);
+  if (!dispositivo.texto && dispositivo.texto !== '') result.push(dispositivo);
   else if (!ocorrencias) {
     const fim = dispositivo.texto.indexOf('” (NR)');
     result.push(dispositivo.texto.substring(0, fim === -1 ? undefined : fim));

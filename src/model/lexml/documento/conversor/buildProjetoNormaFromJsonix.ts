@@ -112,6 +112,13 @@ const buildDispositivoEmenta = (texto: string, textoArticulacao: string): Dispos
   return dispositivo;
 };
 
+const buildTextoEpigrafeFromDocument = (documentoLexml: any): string => {
+  const doc = documentoLexml.value.projetoNorma.norma || documentoLexml.value.projetoNorma.projeto;
+  const textoEpigrafe = doc.parteInicial?.epigrafe.content[0];
+
+  return textoEpigrafe ? textoEpigrafe : buildTextoEpigrafe(getUrn(documentoLexml));
+};
+
 const buildTextoEpigrafe = (urn: string): string => {
   const tipo = getTipoDocumentoUrn(urn);
   return tipo ? `${tipo.descricao.toUpperCase()} Nº , DE 2025` : '';

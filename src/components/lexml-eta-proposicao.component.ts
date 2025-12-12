@@ -67,6 +67,7 @@ export class LexmlEtaProposicaoComponent extends connect(rootStore)(LitElement) 
   private loadProjetoNorma(params?: LexmlEtaParametrosEdicao): void {
     if (!this.projetoNorma || !this.projetoNorma.value) {
       this.projetoNorma = DOCUMENTO_PADRAO;
+      this.projetoNorma.value.metadado.identificacao.urn = this.urn;
     }
 
     const documento = buildProjetoNormaFromJsonix(this.projetoNorma, false);
