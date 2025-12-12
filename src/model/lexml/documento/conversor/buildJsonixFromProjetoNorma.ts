@@ -115,6 +115,8 @@ const buildTree = (dispositivo: Dispositivo, obj: any): any => {
     buildFilhos(dispositivo.filhos, tree);
   }
 
+  if (obj.lXcontainersOmissis && obj.lXcontainersOmissis.length === 0) delete obj.lXcontainersOmissis;
+
   return tree;
 };
 
