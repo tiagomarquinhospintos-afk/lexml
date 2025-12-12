@@ -171,39 +171,46 @@ const buildNode = (dispositivo: Dispositivo): any => {
 };
 
 const buildDispositivo = (dispositivo: Dispositivo, value: any): void => {
-  if (dispositivo.tipo === 'Artigo') return;
-
-  /* eslint-disable prettier/prettier */
-  value['href'] =
-    isCaput(dispositivo) && !isIncisoCaput(dispositivo)
-      ? buildHref(dispositivo.pai!) + '_' + buildHref(dispositivo)
-      : dispositivo.href !== undefined
-      ? dispositivo.href
-      : buildHref(dispositivo);
-  /* eslint-enable prettier/prettier */
-
   value['id'] = buildId(dispositivo);
+  if (!isCaput(dispositivo) && !isOmissis(dispositivo)) {
+    value.rotulo = dispositivo.rotulo;
+  }
+
+  // if (dispositivo.id === 'art1_cpt_alt1_art5_par1') {
+  //   console.log('Deveria ter href: ', dispositivo);
+  // }
+
+  if (dispositivo.tipo === 'Artigo' || dispositivo.tipo === 'Caput' || dispositivo.tipo === 'Inciso' || dispositivo.tipo === 'Paragrafo' || dispositivo.tipo === 'Alinea') {
+    /* eslint-disable prettier/prettier */
+    value['href'] =
+      isCaput(dispositivo) && !isIncisoCaput(dispositivo)
+        ? buildHref(dispositivo.pai!) + '_' + buildHref(dispositivo)
+        : dispositivo.href !== undefined
+        ? dispositivo.href
+        : buildHref(dispositivo);
+    /* eslint-enable prettier/prettier */
+  }
 
   if (isDispositivoCabecaAlteracao(dispositivo)) {
     value['abreAspas'] = 's';
     value.rotulo = dispositivo.rotulo;
-  } else if (!isCaput(dispositivo) && !isOmissis(dispositivo)) {
-    value.rotulo = dispositivo.rotulo;
+  } else {
+    const dispositivoTemp = isCaput(dispositivo) ? dispositivo.pai! : dispositivo;
+    if (isDispositivoAlteracao(dispositivoTemp) && isUltimaAlteracao(dispositivoTemp)) {
+      value['fechaAspas'] = 's';
+      const cabecaAlteracao = getDispositivoCabecaAlteracao(dispositivoTemp);
+      value['notaAlteracao'] = cabecaAlteracao.notaAlteracao || 'NR';
+    }
   }
 
-  const dispositivoTemp = isCaput(dispositivo) ? dispositivo.pai! : dispositivo;
-  if (isDispositivoAlteracao(dispositivoTemp) && isUltimaAlteracao(dispositivoTemp)) {
-    value['fechaAspas'] = 's';
-    const cabecaAlteracao = getDispositivoCabecaAlteracao(dispositivoTemp);
-    value['notaAlteracao'] = cabecaAlteracao.notaAlteracao || 'NR';
-  }
+  if (dispositivo.tipo === 'Artigo') return;
 
   if (isAgrupador(dispositivo)) {
     value.nomeAgrupador = {
       TYPE_NAME: 'br_gov_lexml__1.GenInline',
       content: buildContent(dispositivo),
     };
-  } else if (!isArtigo(dispositivo)) {
+  } else if (!isArtigo(dispositivo) && !isOmissis(dispositivo)) {
     if (dispositivo.texto === TEXTO_OMISSIS) {
       value['textoOmitido'] = 's';
     } else {
