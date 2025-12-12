@@ -49,8 +49,14 @@ export const validarRecursivo = (erros: LogErro[], modelo: any, comparado: any, 
     }
     return;
   } else if (typeof modelo === 'string' && comparado !== null) {
-    modelo = modelo.replace(/\n/g, ' ').replace(/^\s+|\s+$/g, '');
-    comparado = comparado.replace(/\n/g, ' ').replace(/^\s+|\s+$/g, '');
+    modelo = modelo
+      .replace(/\n/g, ' ')
+      .replace(/^\s+|\s+$/g, '')
+      .replaceAll('\\"', "'");
+    comparado = comparado
+      .replace(/\n/g, ' ')
+      .replace(/^\s+|\s+$/g, '')
+      .replaceAll('\\"', "'");
   }
 
   if (modelo !== comparado) {
@@ -59,11 +65,11 @@ export const validarRecursivo = (erros: LogErro[], modelo: any, comparado: any, 
 };
 
 export const addErro = (erros: LogErro[], caminho: string, mensagem: string): void => {
-  erros.push({ caminho: caminho, mensagem: mensagem, tipo: 'erro' });
+  erros.push({ mensagem: mensagem, caminho: caminho, tipo: 'erro' });
 };
 
 interface LogErro {
-  caminho: string;
   mensagem: string;
+  caminho: string;
   tipo: 'erro' | 'aviso';
 }
