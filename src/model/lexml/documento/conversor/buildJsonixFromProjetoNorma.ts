@@ -74,10 +74,12 @@ const montaParteInicial = (projetoNorma: any): any => {
     preambulo: {
       TYPE_NAME: 'br_gov_lexml__1.TextoType',
       id: 'preambulo',
-      p: {
-        TYPE_NAME: 'br_gov_lexml__1.GenInline',
-        content: projetoNorma.preambulo ? [buildContent(projetoNorma.preambulo)] : [],
-      },
+      p: [
+        {
+          TYPE_NAME: 'br_gov_lexml__1.GenInline',
+          content: projetoNorma.preambulo ? buildContent(projetoNorma.preambulo) : [],
+        },
+      ],
     },
   };
 };
