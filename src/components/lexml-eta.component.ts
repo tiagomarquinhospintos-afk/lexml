@@ -216,8 +216,6 @@ export class LexmlEtaComponent extends connect(rootStore)(LitElement) {
 
     this.projetoNorma = this._lexmlEta?.getProjetoAtualizado();
 
-    console.log('this.projetoNorma', this.projetoNorma);
-
     const proposicao = this.montarProposicaoPorUrn(this.urn);
     proposicao.dataUltimaModificacao = this._lexmlData.data || undefined;
     proposicao.projetoNorma = this.projetoNorma;
@@ -316,7 +314,7 @@ export class LexmlEtaComponent extends connect(rootStore)(LitElement) {
         this.desativarMarcaRevisao();
       }
 
-      this._tabsEsquerda.show('lexml-eta-proposicao');
+      this._tabsEsquerda.show('lexml-eta');
 
       setTimeout(() => {
         this._tabsDireita?.show('notas');
@@ -571,7 +569,7 @@ export class LexmlEtaComponent extends connect(rootStore)(LitElement) {
     const getElement = (selector: string): HTMLElement => document.querySelector(selector) as HTMLElement;
 
     const justificativaTabPanel = getElement('sl-tab-panel[name="justificativa"]');
-    const emendaTabPanel = getElement('sl-tab-panel[name="lexml-eta-emenda"]');
+    const proposicaoTabPanel = getElement('sl-tab-panel[name="lexml-eta-proposicao"]');
     const qlToolbarJustificativa = getElement('#editor-texto-rico-justificativa .ql-toolbar');
     const qlToolbarEmenda = getElement('#lx-eta-barra-ferramenta');
 
@@ -581,10 +579,10 @@ export class LexmlEtaComponent extends connect(rootStore)(LitElement) {
         opacity: justificativaTabPanel.style.opacity,
         pointerEvents: justificativaTabPanel.style.pointerEvents,
       },
-      emenda: {
-        display: emendaTabPanel.style.display,
-        opacity: emendaTabPanel.style.opacity,
-        pointerEvents: emendaTabPanel.style.pointerEvents,
+      proposicao: {
+        display: proposicaoTabPanel.style.display,
+        opacity: proposicaoTabPanel.style.opacity,
+        pointerEvents: proposicaoTabPanel.style.pointerEvents,
       },
     };
 
@@ -603,15 +601,15 @@ export class LexmlEtaComponent extends connect(rootStore)(LitElement) {
     if (estilosOriginais.justificativa.display === 'none') {
       setTabPanelStyles(justificativaTabPanel, estilosOriginais.justificativa, true);
     }
-    if (estilosOriginais.emenda.display === 'none') {
-      setTabPanelStyles(emendaTabPanel, estilosOriginais.emenda, true);
+    if (estilosOriginais.proposicao.display === 'none') {
+      setTabPanelStyles(proposicaoTabPanel, estilosOriginais.proposicao, true);
     }
 
     const alturaToolBarJustificativa = qlToolbarJustificativa?.clientHeight + 10;
     const alturaToolBarEmenda = qlToolbarEmenda?.clientHeight + 10;
 
     setTabPanelStyles(justificativaTabPanel, estilosOriginais.justificativa);
-    setTabPanelStyles(emendaTabPanel, estilosOriginais.emenda);
+    setTabPanelStyles(proposicaoTabPanel, estilosOriginais.proposicao);
 
     this.style.setProperty('--heightJustificativa', `${alturaElemento - alturaToolBarJustificativa}px`);
     this.style.setProperty('--heightEmenda', `${alturaElemento - alturaToolBarEmenda}px`);
@@ -626,7 +624,9 @@ export class LexmlEtaComponent extends connect(rootStore)(LitElement) {
   }
 
   buildAlertaJustificativa(): void {
-    if (!this._lexmlJustificativa.isEditorVazio()) {
+    if (this._lexmlJustificativa.isEditorVazio()) {
+      this.disparaAlerta();
+    } else {
       rootStore.dispatch(removerAlerta('alerta-global-justificativa'));
     }
   }
@@ -688,7 +688,7 @@ export class LexmlEtaComponent extends connect(rootStore)(LitElement) {
         sl-tab-panel.overflow-hidden::part(base) {
           overflow-y: auto;
         }
-        lexml-eta-emenda {
+        lexml-eta-proposicao {
           font-family: var(--eta-font-serif);
           text-align: left;
         }
@@ -823,14 +823,14 @@ export class LexmlEtaComponent extends connect(rootStore)(LitElement) {
         <sl-icon slot="handle" name="grip-vertical"></sl-icon>
         <div slot="start">
           <sl-tab-group id="tabs-esquerda">
-            <sl-tab slot="nav" panel="lexml-eta-emenda">Texto</sl-tab>
+            <sl-tab slot="nav" panel="lexml-eta-proposicao">Texto</sl-tab>
             <sl-tab slot="nav" panel="justificativa">Justificação</sl-tab>
             <sl-tab slot="nav" panel="autoria">Destino, Data, Autoria e Impressão</sl-tab>
             <sl-tab slot="nav" panel="avisos">
               Avisos
               <div class="badge-pulse" id="contadorAvisos">${this.totalAlertas > 0 ? html` <sl-badge variant="danger" pill pulse>${this.totalAlertas}</sl-badge> ` : ''}</div>
             </sl-tab>
-            <sl-tab-panel name="lexml-eta-emenda" class="overflow-hidden">
+            <sl-tab-panel name="lexml-eta-proposicao" class="overflow-hidden">
               <lexml-eta-proposicao style="display: block}" id="lexmlEta" .lexmlEtaConfig=${this.lexmlEmendaConfig} @onchange=${this.onChange}></lexml-eta-proposicao>
             </sl-tab-panel>
             <sl-tab-panel name="justificativa" class="overflow-hidden">
