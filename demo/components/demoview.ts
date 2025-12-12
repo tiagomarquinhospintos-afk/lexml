@@ -35,6 +35,7 @@ import { MPV_1170_2023 } from '../doc/mpv_1170_2023';
 import { MPV_1232_2024 } from '../doc/mpv_1232_2024';
 import { MPV_1170_2023_ALTERADA } from '../doc/mpv_1170_2023_alterada';
 import { PL_4_2025 } from '../doc/pl_4_2025';
+import { validarRecursivo } from './jsonValidator';
 
 const mapProjetosNormas = {
   mpv_885_2019: MPV_885_2019,
@@ -199,6 +200,7 @@ export class DemoView extends LitElement {
             params.projetoNorma = this.projetoNorma;
             //params.autoriaPadrao = { identificacao: '6335', siglaCasaLegislativa: 'SF' };
             //params.opcoesImpressaoPadrao = { imprimirBrasao: true, textoCabecalho: 'Texto Teste Dennys', tamanhoFonte: 14 };
+            console.log('projetoNormaArquivo', params.projetoNorma);
           } else {
             params.sigla = 'PL';
             params.numero = '1';
@@ -245,6 +247,36 @@ export class DemoView extends LitElement {
     }
   }
 
+  comparar(): void {
+    const selecionaArquivoComparar = document.getElementById('compararFileUpload');
+    if (selecionaArquivoComparar !== null) {
+      selecionaArquivoComparar.click();
+    }
+  }
+
+  selecionaArquivoComparar(event: Event): void {
+    const fileInput = event.target as HTMLInputElement;
+    if (fileInput && fileInput.files) {
+      const fReader = new FileReader();
+      fReader.readAsText(fileInput.files[0]);
+      fReader.onloadend = async (e): Promise<void> => {
+        if (e.target?.result) {
+          const projetoNormaBase = this.elDocumento.value.indexOf('sem_texto') >= 0 ? null : { ...mapProjetosNormas[this.elDocumento.value] };
+
+          const proposicao = JSON.parse(e.target.result as string);
+          const projetoNormaArquivo = proposicao.projetoNorma;
+
+          console.log('projetoNormaBase', projetoNormaBase);
+          console.log('projetoNormaArquivo', projetoNormaArquivo);
+
+          const erros = [];
+          validarRecursivo(erros, projetoNormaBase, projetoNormaArquivo, 'raiz');
+          console.log('erros', erros);
+        }
+      };
+    }
+  }
+
   selecionaArquivo(event: Event): void {
     const fileInput = event.target as HTMLInputElement;
     if (fileInput && fileInput.files) {
@@ -255,6 +287,8 @@ export class DemoView extends LitElement {
           this.modo = 'edicao';
           const proposicao = JSON.parse(e.target.result as string);
           this.projetoNorma = proposicao.projetoNorma;
+
+          console.log('projetoNormaArquivo', this.projetoNorma);
 
           const params = new LexmlEtaParametrosEdicao();
           params.projetoNorma = this.projetoNorma;
@@ -343,7 +377,7 @@ export class DemoView extends LitElement {
           display: none;
           outline: 0;
           border: 0;
-          -webkit-box-shadow: 0px;
+          -webkit-box-shadow: none;
           box-shadow: none;
           height: calc(100vh - 100px);
         }
@@ -367,6 +401,8 @@ export class DemoView extends LitElement {
           <input type="button" value="Salvar" @click=${this.salvar} />
           <input type="button" value="Abrir" @click=${this.abrir} />
           <input type="button" value="Usuário" @click=${this.usuario} />
+          <input type="button" value="Comparar" @click=${this.comparar} />
+          <input type="file" id="compararFileUpload" accept="application/json" @change="${this.selecionaArquivoComparar}" style="display: none" />
           <input type="file" id="fileUpload" accept="application/json" @change="${this.selecionaArquivo}" style="display: none" />
         </div>
 
