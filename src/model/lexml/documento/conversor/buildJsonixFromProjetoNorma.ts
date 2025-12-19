@@ -1,9 +1,10 @@
 import { isDispositivoAlteracao, isUltimaAlteracao, getDispositivoCabecaAlteracao, isDispositivoCabecaAlteracao } from './../../hierarquia/hierarquiaUtil';
 import { Articulacao, Artigo, Dispositivo } from '../../../dispositivo/dispositivo';
-import { isAgrupador, isArtigo, isCaput, isIncisoCaput, isOmissis } from '../../../dispositivo/tipo';
+import { isAgrupador, isArticulacao, isArtigo, isCaput, isIncisoCaput, isOmissis } from '../../../dispositivo/tipo';
 import { TEXTO_OMISSIS } from '../../conteudo/textoOmissis';
 import { buildHref, buildId, buildIdAlteracao } from '../../util/idUtil';
 import { isNorma, ProjetoNorma } from '../projetoNorma';
+import { isValidText } from '../../../../util/string-util';
 
 export const buildJsonixFromProjetoNorma = (projetoNorma: ProjetoNorma, urn: string): any => {
   const resultado = montaCabecalho(urn);
@@ -64,12 +65,12 @@ const montaParteInicial = (projetoNorma: any): any => {
     epigrafe: {
       TYPE_NAME: 'br_gov_lexml__1.GenInline',
       id: 'epigrafe',
-      content: projetoNorma.epigrafe ? buildContent(projetoNorma.epigrafe) : [],
+      content: projetoNorma.epigrafe ? buildStructuredContent(projetoNorma.epigrafe, 'texto') : [],
     },
     ementa: {
       TYPE_NAME: 'br_gov_lexml__1.GenInline',
       id: 'ementa',
-      content: projetoNorma.ementa ? buildContent(projetoNorma.ementa) : [],
+      content: projetoNorma.ementa ? buildStructuredContent(projetoNorma.ementa, 'texto') : [],
     },
     preambulo: {
       TYPE_NAME: 'br_gov_lexml__1.TextoType',
@@ -77,7 +78,7 @@ const montaParteInicial = (projetoNorma: any): any => {
       p: [
         {
           TYPE_NAME: 'br_gov_lexml__1.GenInline',
-          content: projetoNorma.preambulo ? buildContent(projetoNorma.preambulo) : [],
+          content: projetoNorma.preambulo ? buildStructuredContent(projetoNorma.preambulo, 'texto') : [],
         },
       ],
     },
@@ -161,7 +162,7 @@ const buildNode = (dispositivo: Dispositivo): any => {
       string: `{http://www.lexml.gov.br/1.0}${dispositivo.tipo}`,
     },
     value: {
-      TYPE_NAME: dispositivo.tipo === 'Omissis' ? 'br_gov_lexml__1.Omissis' : 'br_gov_lexml__1.DispositivoType',
+      TYPE_NAME: buildTypeName(dispositivo),
     },
   };
 
@@ -170,15 +171,18 @@ const buildNode = (dispositivo: Dispositivo): any => {
   return node;
 };
 
+const buildTypeName = (dispositivo: Dispositivo): string => {
+  if (dispositivo.tipo === 'Omissis') return 'br_gov_lexml__1.Omissis';
+  else if (isAgrupador(dispositivo) && !isArticulacao(dispositivo)) return 'br_gov_lexml__1.Hierarchy';
+
+  return 'br_gov_lexml__1.DispositivoType';
+};
+
 const buildDispositivo = (dispositivo: Dispositivo, value: any): void => {
   value['id'] = buildId(dispositivo);
   if (!isCaput(dispositivo) && !isOmissis(dispositivo)) {
     value.rotulo = dispositivo.rotulo;
   }
-
-  // if (dispositivo.id === 'art1_cpt_alt1_art5_par1') {
-  //   console.log('Deveria ter href: ', dispositivo);
-  // }
 
   if (dispositivo.tipo === 'Artigo' || dispositivo.tipo === 'Caput' || dispositivo.tipo === 'Inciso' || dispositivo.tipo === 'Paragrafo' || dispositivo.tipo === 'Alinea') {
     /* eslint-disable prettier/prettier */
@@ -203,23 +207,30 @@ const buildDispositivo = (dispositivo: Dispositivo, value: any): void => {
     }
   }
 
+  if (isValidText(dispositivo.tituloDispositivo)) {
+    value.tituloDispositivo = {
+      TYPE_NAME: 'br_gov_lexml__1.GenInline',
+      content: buildStructuredContent(dispositivo, 'tituloDispositivo'),
+    };
+  }
+
   if (dispositivo.tipo === 'Artigo') return;
 
   if (isAgrupador(dispositivo)) {
     value.nomeAgrupador = {
       TYPE_NAME: 'br_gov_lexml__1.GenInline',
-      content: buildContent(dispositivo),
+      content: buildStructuredContent(dispositivo, 'texto'),
     };
   } else if (!isArtigo(dispositivo) && !isOmissis(dispositivo)) {
     if (dispositivo.texto === TEXTO_OMISSIS) {
       value['textoOmitido'] = 's';
     } else {
-      value['p'] = [{ TYPE_NAME: 'br_gov_lexml__1.GenInline', content: buildContent(dispositivo) }];
+      value['p'] = [{ TYPE_NAME: 'br_gov_lexml__1.GenInline', content: buildStructuredContent(dispositivo, 'texto') }];
     }
   }
 };
 
-const buildContent = (dispositivo: Dispositivo): any[] => {
+/*const buildContent = (dispositivo: Dispositivo): any[] => {
   const regex = /<a[^>]+href="(.*?)"[^>]*>(.*?)<\/a>/gi;
   const result: any[] = [];
 
@@ -244,6 +255,44 @@ const buildContent = (dispositivo: Dispositivo): any[] => {
       const to = ocorrencias[i + 1] ? dispositivo.texto.indexOf(ocorrencias[i + 1]) : dispositivo.texto.length;
       result.push(
         dispositivo.texto
+          .substring(from, to)
+          ?.replace(/strong>/gi, 'b>')
+          .replace(/em>/gi, 'i>')
+      );
+    }
+  });
+  return result;
+};*/
+
+const buildStructuredContent = (dispositivo: Dispositivo, campo: string): any[] => {
+  const regex = /<a[^>]+href="(.*?)"[^>]*>(.*?)<\/a>/gi;
+  const result: any[] = [];
+
+  const conteudo = dispositivo[campo];
+  if (!conteudo && conteudo !== '') {
+    result.push(dispositivo);
+    return result;
+  }
+
+  const ocorrencias = conteudo.match(regex);
+  if (!ocorrencias) {
+    const fim = conteudo.indexOf('” (NR)');
+    result.push(conteudo.substring(0, fim === -1 ? undefined : fim));
+  } else if (!conteudo.startsWith(ocorrencias[0])) {
+    result.push(conteudo.substring(0, conteudo.indexOf(ocorrencias![0])));
+  }
+
+  ocorrencias?.forEach((m, i) => {
+    const http = m.match(regex) ? m : '';
+
+    result.push(buildSpan(http ?? ''));
+
+    const from = conteudo.indexOf(m) + m.length;
+
+    if (from < conteudo.length) {
+      const to = ocorrencias[i + 1] ? conteudo.indexOf(ocorrencias[i + 1]) : conteudo.length;
+      result.push(
+        conteudo
           .substring(from, to)
           ?.replace(/strong>/gi, 'b>')
           .replace(/em>/gi, 'i>')
