@@ -184,7 +184,10 @@ const buildDispositivo = (dispositivo: Dispositivo, value: any): void => {
     value.rotulo = dispositivo.rotulo;
   }
 
-  if (dispositivo.tipo === 'Artigo' || dispositivo.tipo === 'Caput' || dispositivo.tipo === 'Inciso' || dispositivo.tipo === 'Paragrafo' || dispositivo.tipo === 'Alinea') {
+  if (
+    isDispositivoAlteracao(dispositivo) &&
+    (dispositivo.tipo === 'Artigo' || dispositivo.tipo === 'Caput' || dispositivo.tipo === 'Inciso' || dispositivo.tipo === 'Paragrafo' || dispositivo.tipo === 'Alinea')
+  ) {
     /* eslint-disable prettier/prettier */
     value['href'] =
       isCaput(dispositivo) && !isIncisoCaput(dispositivo)
