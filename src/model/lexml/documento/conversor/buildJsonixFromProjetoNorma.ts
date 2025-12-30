@@ -1,4 +1,11 @@
-import { isDispositivoAlteracao, isUltimaAlteracao, getDispositivoCabecaAlteracao, isDispositivoCabecaAlteracao } from './../../hierarquia/hierarquiaUtil';
+import {
+  isDispositivoAlteracao,
+  isUltimaAlteracao,
+  getDispositivoCabecaAlteracao,
+  isDispositivoCabecaAlteracao,
+  isCaputComIrmaoUnico,
+  isOmissisIrmaoUnico,
+} from './../../hierarquia/hierarquiaUtil';
 import { Articulacao, Artigo, Dispositivo } from '../../../dispositivo/dispositivo';
 import { isAgrupador, isArticulacao, isArtigo, isCaput, isIncisoCaput, isOmissis } from '../../../dispositivo/tipo';
 import { TEXTO_OMISSIS } from '../../conteudo/textoOmissis';
@@ -125,12 +132,11 @@ const buildAlteracaoSeNecessario = (dispositivo: Dispositivo, node: any): void =
   if (dispositivo.hasAlteracao()) {
     node['alteracao'] = {
       TYPE_NAME: 'br_gov_lexml__1.Alteracao',
-      base: '',
       id: '',
       content: [],
     };
 
-    node.alteracao.base = dispositivo.alteracoes?.base ?? '';
+    if (dispositivo.alteracoes?.base) node.alteracao.base = dispositivo.alteracoes.base;
     node.alteracao.id = buildIdAlteracao((dispositivo as Artigo).caput!);
 
     dispositivo.alteracoes!.filhos?.forEach(filho => {
@@ -201,12 +207,25 @@ const buildDispositivo = (dispositivo: Dispositivo, value: any): void => {
   if (isDispositivoCabecaAlteracao(dispositivo)) {
     value['abreAspas'] = 's';
     value.rotulo = dispositivo.rotulo;
+  } else if (isDispositivoAlteracao(dispositivo) && ((isCaput(dispositivo) && isCaputComIrmaoUnico(dispositivo)) || (isOmissis(dispositivo) && isOmissisIrmaoUnico(dispositivo)))) {
+    if (dispositivo.id === 'art2_cpt_alt1_art203_omi1') {
+      console.log('isDispositivoAlteracao(dispositivoTemp) && isUltimaAlteracao(dispositivoTemp)', isDispositivoAlteracao(dispositivo), isUltimaAlteracao(dispositivo, true));
+    }
+    value['fechaAspas'] = 's';
+    const cabecaAlteracao = getDispositivoCabecaAlteracao(dispositivo);
+    value['notaAlteracao'] = cabecaAlteracao.notaAlteracao || 'NR';
   } else {
-    const dispositivoTemp = isCaput(dispositivo) ? dispositivo.pai! : dispositivo;
-    if (isDispositivoAlteracao(dispositivoTemp) && isUltimaAlteracao(dispositivoTemp)) {
-      value['fechaAspas'] = 's';
-      const cabecaAlteracao = getDispositivoCabecaAlteracao(dispositivoTemp);
-      value['notaAlteracao'] = cabecaAlteracao.notaAlteracao || 'NR';
+    if (isDispositivoAlteracao(dispositivo)) {
+      const dispositivoTemp = dispositivo;
+      if (dispositivo.id === 'art2_cpt_alt1_art203_omi1') {
+        console.log('isDispositivoAlteracao(dispositivoTemp) && isUltimaAlteracao(dispositivoTemp)', isDispositivoAlteracao(dispositivo), isUltimaAlteracao(dispositivo, true));
+      }
+
+      if (isDispositivoAlteracao(dispositivoTemp) && isUltimaAlteracao(dispositivoTemp)) {
+        value['fechaAspas'] = 's';
+        const cabecaAlteracao = getDispositivoCabecaAlteracao(dispositivoTemp);
+        value['notaAlteracao'] = cabecaAlteracao.notaAlteracao || 'NR';
+      }
     }
   }
 
