@@ -5,7 +5,7 @@ import {
   isDispositivoCabecaAlteracao,
   isCaputComIrmaoUnico,
   isOmissisIrmaoUnico,
-} from './../../hierarquia/hierarquiaUtil';
+} from '../../hierarquia/hierarquiaUtil';
 import { Articulacao, Artigo, Dispositivo } from '../../../dispositivo/dispositivo';
 import { isAgrupador, isArticulacao, isArtigo, isCaput, isIncisoCaput, isOmissis } from '../../../dispositivo/tipo';
 import { TEXTO_OMISSIS } from '../../conteudo/textoOmissis';
@@ -192,7 +192,12 @@ const buildDispositivo = (dispositivo: Dispositivo, value: any): void => {
 
   if (
     isDispositivoAlteracao(dispositivo) &&
-    (dispositivo.tipo === 'Artigo' || dispositivo.tipo === 'Caput' || dispositivo.tipo === 'Inciso' || dispositivo.tipo === 'Paragrafo' || dispositivo.tipo === 'Alinea')
+    (dispositivo.tipo === 'Artigo' ||
+      dispositivo.tipo === 'Caput' ||
+      dispositivo.tipo === 'Inciso' ||
+      dispositivo.tipo === 'Paragrafo' ||
+      dispositivo.tipo === 'Alinea' ||
+      dispositivo.tipo === 'Item')
   ) {
     /* eslint-disable prettier/prettier */
     value['href'] =
@@ -204,7 +209,7 @@ const buildDispositivo = (dispositivo: Dispositivo, value: any): void => {
     /* eslint-enable prettier/prettier */
   }
 
-  if (isDispositivoCabecaAlteracao(dispositivo)) {
+  if (dispositivo.cabecaAlteracao || isDispositivoCabecaAlteracao(dispositivo)) {
     value['abreAspas'] = 's';
     value.rotulo = dispositivo.rotulo;
   } else if (isDispositivoAlteracao(dispositivo) && ((isCaput(dispositivo) && isCaputComIrmaoUnico(dispositivo)) || (isOmissis(dispositivo) && isOmissisIrmaoUnico(dispositivo)))) {
@@ -217,9 +222,6 @@ const buildDispositivo = (dispositivo: Dispositivo, value: any): void => {
   } else {
     if (isDispositivoAlteracao(dispositivo)) {
       const dispositivoTemp = dispositivo;
-      if (dispositivo.id === 'art2_cpt_alt1_art203_omi1') {
-        console.log('isDispositivoAlteracao(dispositivoTemp) && isUltimaAlteracao(dispositivoTemp)', isDispositivoAlteracao(dispositivo), isUltimaAlteracao(dispositivo, true));
-      }
 
       if (isDispositivoAlteracao(dispositivoTemp) && isUltimaAlteracao(dispositivoTemp)) {
         value['fechaAspas'] = 's';
@@ -251,40 +253,6 @@ const buildDispositivo = (dispositivo: Dispositivo, value: any): void => {
     }
   }
 };
-
-/*const buildContent = (dispositivo: Dispositivo): any[] => {
-  const regex = /<a[^>]+href="(.*?)"[^>]*>(.*?)<\/a>/gi;
-  const result: any[] = [];
-
-  const ocorrencias = dispositivo.texto?.match(regex);
-
-  if (!dispositivo.texto && dispositivo.texto !== '') result.push(dispositivo);
-  else if (!ocorrencias) {
-    const fim = dispositivo.texto.indexOf('” (NR)');
-    result.push(dispositivo.texto.substring(0, fim === -1 ? undefined : fim));
-  } else if (!dispositivo.texto.startsWith(ocorrencias[0])) {
-    result.push(dispositivo.texto.substring(0, dispositivo.texto.indexOf(ocorrencias![0])));
-  }
-
-  ocorrencias?.forEach((m, i) => {
-    const http = m.match(regex) ? m : '';
-
-    result.push(buildSpan(http ?? ''));
-
-    const from = dispositivo.texto?.indexOf(m) + m.length;
-
-    if (from < dispositivo.texto.length) {
-      const to = ocorrencias[i + 1] ? dispositivo.texto.indexOf(ocorrencias[i + 1]) : dispositivo.texto.length;
-      result.push(
-        dispositivo.texto
-          .substring(from, to)
-          ?.replace(/strong>/gi, 'b>')
-          .replace(/em>/gi, 'i>')
-      );
-    }
-  });
-  return result;
-};*/
 
 const buildStructuredContent = (dispositivo: Dispositivo, campo: string): any[] => {
   const regex = /<a[^>]+href="(.*?)"[^>]*>(.*?)<\/a>/gi;
