@@ -1,9 +1,10 @@
 import { Articulacao, Artigo, Dispositivo } from '../../dispositivo/dispositivo';
 import { DescricaoSituacao } from '../../dispositivo/situacao';
-import { isAgrupador, isArticulacao, isArtigo, isDispositivoDeArtigo, isDispositivoGenerico, isEmenta, isIncisoCaput, isParagrafo, Tipo } from '../../dispositivo/tipo';
+import { isAgrupador, isArticulacao, isArtigo, isDispositivoDeArtigo, isDispositivoGenerico, isEmenta, isIncisoCaput, isParagrafo, Tipo, isCaput } from '../../dispositivo/tipo';
 import { omissis } from '../acao/adicionarElementoAction';
+import { hasIrmaoOriginalDepois } from '../numeracao/numeracaoUtil';
 import { DispositivoAdicionado } from '../situacao/dispositivoAdicionado';
-import { isAgrupadorNaoArticulacao, isCaput, isOmissis } from './../../dispositivo/tipo';
+import { isAgrupadorNaoArticulacao, isOmissis } from './../../dispositivo/tipo';
 import { TipoDispositivo } from './../tipo/tipoDispositivo';
 
 export function getArticulacao(dispositivo: Dispositivo): Articulacao {
@@ -335,12 +336,12 @@ export const isPrimeiroMesmoTipo = (dispositivo: Dispositivo): boolean => {
 };
 
 export const hasFilhos = (dispositivo: Dispositivo): boolean => {
-  return dispositivo.filhos && dispositivo.filhos.length > 0;
+  return dispositivo && dispositivo.filhos && dispositivo.filhos.length > 0;
 };
 
 export const getDispositivoAnterior = (dispositivo: Dispositivo): Dispositivo | undefined => {
   const pos = dispositivo.pai?.indexOf(dispositivo);
-  return pos && pos > 0 ? dispositivo.pai!.filhos[pos - 1] : undefined;
+  return pos && pos > 0 ? dispositivo.pai?.filhos[pos - 1] : undefined;
 };
 
 export const getDispositivoAnteriorMesmoTipo = (dispositivo: Dispositivo): Dispositivo | undefined => {
@@ -481,14 +482,26 @@ export const isAntesDoPrimeiroDispositivoOriginal = (dispositivo: Dispositivo): 
   return getDispositivosPosterioresMesmoTipo(dispositivo).filter(d => isOriginal(d) && d.numero === '1').length > 0;
 };
 
-export const isUltimaAlteracao = (dispositivo: Dispositivo): boolean => {
+export const isUltimaAlteracao = (dispositivo: Dispositivo, print = false): boolean => {
   const atual = getDispositivoCabecaAlteracao(dispositivo);
 
   const lista = getDispositivoAndFilhosAsLista(atual);
 
   const ultimoLista = lista[lista.length - 1];
   const dispTeste = isCaput(dispositivo) ? dispositivo.pai! : dispositivo;
+  if (print) {
+    console.log('dispositivo: ', dispositivo);
+    console.log('atual: ', atual);
+    console.log('ultimoLista: ', ultimoLista);
+    console.log('dispTeste: ', isCaput(dispositivo), dispTeste);
+    console.log('lista: ', lista);
+  }
+
   if (ultimoLista === dispTeste) {
+    if (print) {
+      console.log('atual.situacao.descricaoSituacao', atual.situacao.descricaoSituacao, hasIrmaoOriginalDepois(dispositivo), atual === ultimoLista);
+    }
+
     if (atual.situacao.descricaoSituacao === DescricaoSituacao.DISPOSITIVO_ADICIONADO && !isArticulacaoAlteracao(atual.pai!)) {
       const proximo = getDispositivoPosteriorNaSequenciaDeLeitura(atual, d => {
         return isArtigo(d) || isAgrupadorNaoArticulacao(d) || !isDispositivoAlteracao(d);
@@ -499,11 +512,35 @@ export const isUltimaAlteracao = (dispositivo: Dispositivo): boolean => {
         !isArticulacaoAlteracao(proximo.pai!) &&
         proximo.situacao.descricaoSituacao === DescricaoSituacao.DISPOSITIVO_ADICIONADO
       );
+    } else if (atual.situacao.descricaoSituacao === DescricaoSituacao.DISPOSITIVO_NOVO && !hasFilhos(atual) && atual === ultimoLista) {
+      return true;
+    } else if (possuiFilhosOuCaput(dispTeste, print)) {
+      return false;
     }
     return true;
   }
 
   return false;
+};
+
+const possuiFilhosOuCaput = (dispositivo: Dispositivo, print = false): boolean => {
+  if (print) {
+    console.log('possui filhos? ', isArtigo(dispositivo), hasFilhos(dispositivo), isArtigo(dispositivo) ? (dispositivo as Artigo).caput : null);
+    console.log('teste ', hasFilhos(dispositivo) || (isArtigo(dispositivo) && !!(dispositivo as Artigo).caput));
+  }
+  return hasFilhos(dispositivo) || (isArtigo(dispositivo) && !!(dispositivo as Artigo).caput);
+};
+
+export const isCaputComIrmaoUnico = (dispositivo: Dispositivo) => {
+  const pai = dispositivo.pai;
+
+  return pai && !hasFilhos(pai) && !!(pai as Artigo).caput;
+};
+
+export const isOmissisIrmaoUnico = (dispositivo: Dispositivo) => {
+  const pai = dispositivo.pai;
+
+  return pai && pai?.isLastFilho(dispositivo);
 };
 
 const buscaDispositivoDeArtigoPosterior = (pai: Dispositivo, index: number): Dispositivo | undefined => {

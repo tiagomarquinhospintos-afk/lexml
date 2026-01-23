@@ -8,7 +8,7 @@ import {
   getTiposAgrupadorArtigoPermitidosNaArticulacao,
   getDispositivoAndFilhosAsLista,
 } from './../../../model/lexml/hierarquia/hierarquiaUtil';
-import { isAgrupador, isArticulacao, isArtigo } from '../../../model/dispositivo/tipo';
+import { isAgrupador, isArticulacao, isArtigo, isEmenta } from '../../../model/dispositivo/tipo';
 import { getDispositivoFromElemento } from '../../../model/elemento/elementoUtil';
 import { isAcaoPermitida } from '../../../model/lexml/acao/acaoUtil';
 import { RemoverElemento } from '../../../model/lexml/acao/removerElementoAction';
@@ -50,8 +50,14 @@ export const removeElemento = (state: any, action: any): State => {
     }
   }
 
+  if (isEmenta(dispositivo)) {
+    return retornaEstadoAtualComMensagem(state, { tipo: TipoMensagem.ERROR, descricao: 'Não é possível excluir a ementa.' });
+  }
+
   if (!isAcaoPermitida(dispositivo, RemoverElemento)) {
-    return retornaEstadoAtualComMensagem(state, { tipo: TipoMensagem.ERROR, descricao: 'Não é possível excluir um dispositivo original mas apenas suprimi-lo.' });
+    return !isEmenta(dispositivo)
+      ? retornaEstadoAtualComMensagem(state, { tipo: TipoMensagem.ERROR, descricao: 'Não é possível excluir um dispositivo original mas apenas suprimi-lo.' })
+      : state;
   }
 
   if (

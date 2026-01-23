@@ -352,7 +352,7 @@ export class EtaQuill extends Quill {
         blotCursor.tagName === EtaBlotTipoOmissis.tagName ||
         blotCursor.tagName === EtaBlotExistencia.tagName
       ) {
-        this.setSelection(this.getIndex(blotCursor.linha.blotConteudo), 0, Quill.sources.SILENT);
+        if (blotCursor.linha.blotConteudo) this.setSelection(this.getIndex(blotCursor.linha.blotConteudo), 0, Quill.sources.SILENT);
       } else if (blotCursor.tagName === EtaBlotFechaAspas.tagName || blotCursor.tagName === EtaBlotNotaAlteracao.tagName) {
         this.setSelection(this.getIndex(blotCursor.linha.blotFechaAspas) - 1, 0, Quill.sources.SILENT);
       }
@@ -426,7 +426,7 @@ export class EtaQuill extends Quill {
     this.processandoMudancaLinha = true;
 
     this._linhaAtual = linha;
-    this._linhaAtual.blotConteudo.htmlAnt = this._linhaAtual.blotConteudo.html;
+    if (this._linhaAtual.blotConteudo) this._linhaAtual.blotConteudo.htmlAnt = this._linhaAtual.blotConteudo.html;
     linha.ativarBorda();
     this.scrollToElemento(linha.uuid);
   }

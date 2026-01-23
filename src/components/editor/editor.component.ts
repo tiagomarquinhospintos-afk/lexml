@@ -601,7 +601,7 @@ export class EditorComponent extends connect(rootStore)(LitElement) {
 
   private transformarElemento(ev: KeyboardEvent): void {
     const linha: EtaContainerTable = this.quill.linhaAtual;
-    const blotConteudo: EtaBlotConteudo = linha.blotConteudo;
+    const blotConteudo: EtaBlotConteudo = linha.blotConteudo ?? '';
     const textoLinha = blotConteudo.html;
 
     const elemento: Elemento = this.criarElemento(linha.uuid, linha.uuid2, linha.lexmlId, linha.tipo, textoLinha, linha.numero, linha.hierarquia);

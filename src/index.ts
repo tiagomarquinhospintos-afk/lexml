@@ -38,7 +38,7 @@ export { AutoriaComponent } from './components/autoria/autoria.component';
 export { DestinoComponent } from './components/destino/destino.component';
 export { LexmlAutocomplete } from './components/lexml-autocomplete';
 export { DataComponent } from './components/data/data.component';
-export { LexmlEmendaComponent, LexmlEtaParametrosEdicao } from './components/lexml-emenda.component';
+export { LexmlEtaComponent, LexmlEtaParametrosEdicao } from './components/lexml-eta.component';
 export { LexmlEtaConfig } from './model/lexmlEtaConfig';
 export { AlertasComponent } from './components/alertas/alertas.component';
 export { AjudaComponent } from './components/ajuda/ajuda.component';

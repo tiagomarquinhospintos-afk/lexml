@@ -102,7 +102,7 @@ export const validaTextoDispositivo = (dispositivo: Dispositivo): Mensagem[] => 
   // validações comuns a Artigo e Parágrafo
   //
   if (
-    (isArtigo(dispositivo) || isParagrafo(dispositivo)) &&
+    (isArtigo(dispositivo) || isParagrafo(dispositivo) || isEmenta(dispositivo)) &&
     dispositivo.texto &&
     dispositivo.texto.indexOf(TEXTO_OMISSIS) === -1 &&
     !/^[.]+$/.test(dispositivo.texto) &&
@@ -147,7 +147,7 @@ export const validaTextoDispositivo = (dispositivo: Dispositivo): Mensagem[] => 
   // Artigo e Parágrafo
   if (
     !isDispositivoAlteracao(dispositivo) &&
-    (isArtigo(dispositivo) || isParagrafo(dispositivo)) &&
+    (isArtigo(dispositivo) || isParagrafo(dispositivo) || isEmenta(dispositivo)) &&
     dispositivo.texto &&
     dispositivo.texto.indexOf(TEXTO_OMISSIS) === -1 &&
     !/^[.]+$/.test(dispositivo.texto) &&

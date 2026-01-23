@@ -245,6 +245,7 @@ export class EtaContainerTable extends EtaContainer {
 
   // TODO Rever a forma atual de se atribuir estilos
   setEstilo(elemento: Elemento): void {
+    if (!this.blotRotulo) return;
     let classeCSS = '';
 
     this.resetClasses();
@@ -265,7 +266,7 @@ export class EtaContainerTable extends EtaContainer {
       this.domNode.classList.add(classeCSS);
     }
 
-    this.blotRotulo!.setEstilo(elemento);
+    this.blotRotulo.setEstilo(elemento);
   }
 
   static atualizarAtributoRevisao(elemento: Elemento, node: HTMLElement): void {
@@ -316,7 +317,7 @@ export class EtaContainerTable extends EtaContainer {
     this.blotAbreAspas?.atualizarAtributos(elemento);
     this.blotRotulo?.atualizarAtributos(elemento);
     this.blotExistencia?.atualizarAtributos(elemento);
-    this.blotConteudo.atualizarAtributos(elemento);
+    this.blotConteudo?.atualizarAtributos(elemento);
     this.blotFechaAspas?.atualizarAtributos(elemento);
     this.blotNotaAlteracao?.atualizarAtributos(elemento);
   }

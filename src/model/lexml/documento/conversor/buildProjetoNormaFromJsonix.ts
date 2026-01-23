@@ -7,7 +7,7 @@ import { createAlteracao, createArticulacao, criaDispositivo } from '../../dispo
 import { getDispositivoAndFilhosAsLista } from '../../hierarquia/hierarquiaUtil';
 import { DispositivoOriginal } from '../../situacao/dispositivoOriginal';
 import { ProjetoNorma } from '../projetoNorma';
-import { getTipo } from '../urnUtil';
+import { getTipo, getTipoDocumentoUrn } from '../urnUtil';
 import { isArtigo } from './../../../dispositivo/tipo';
 
 export let isEmendamento = false;
@@ -54,7 +54,7 @@ export const buildProjetoNormaFromJsonix = (documentoLexml: any, emendamento = f
     tipo: getTipo(getUrn(documentoLexml)),
     ...getMetadado(documentoLexml),
     ...getParteInicial(documentoLexml),
-    ...getTextoArticulado(documentoLexml.value.projetoNorma.norma || documentoLexml.value.projetoNorma.projeto),
+    ...getTextoArticulado(documentoLexml.value.projetoNorma.norma || documentoLexml.value.projetoNorma.projeto, buildTextoEpigrafeFromDocument(documentoLexml)),
   };
 
   if (projetoNorma.articulacao) {
@@ -85,25 +85,25 @@ const getMetadado = (documento: any): Metadado => {
 
 const getParteInicial = (documento: any): ParteInicial => {
   const parteInicial = documento?.value?.projetoNorma?.norma?.parteInicial;
-  const epigrafe = parteInicial?.epigrafe?.content[0] ?? '';
+  const epigrafe = parteInicial?.epigrafe?.content[0]?.length > 0 ? parteInicial?.epigrafe?.content[0] : buildTextoEpigrafe(getUrn(documento));
   const ementa = buildContent(parteInicial?.ementa.content);
   const preambulo = parteInicial?.preambulo?.p?.length ? parteInicial?.preambulo?.p[0].content[0] : '';
 
   return {
     epigrafe: retiraCaracteresDesnecessarios(epigrafe),
-    ementa: buildDispositivoEmenta(retiraCaracteresDesnecessarios(ementa)),
+    ementa: buildDispositivoEmenta(retiraCaracteresDesnecessarios(ementa), epigrafe),
     preambulo: retiraCaracteresDesnecessarios(preambulo),
   };
 };
 
-export const getTextoArticulado = (norma: any): TextoArticulado => {
+export const getTextoArticulado = (norma: any, textoArticulacao?: string): TextoArticulado => {
   return {
-    articulacao: buildArticulacao(norma.articulacao),
+    articulacao: buildArticulacao(norma.articulacao, textoArticulacao),
   };
 };
 
-const buildDispositivoEmenta = (texto: string): Dispositivo | undefined => {
-  const dispositivo = criaDispositivo(createArticulacao(), 'Ementa');
+const buildDispositivoEmenta = (texto: string, textoArticulacao: string): Dispositivo | undefined => {
+  const dispositivo = criaDispositivo(createArticulacao(textoArticulacao), 'Ementa');
   dispositivo.pai = undefined;
   dispositivo.texto = substituiAspasRetasPorCurvas(texto);
   dispositivo.rotulo = '';
@@ -112,8 +112,20 @@ const buildDispositivoEmenta = (texto: string): Dispositivo | undefined => {
   return dispositivo;
 };
 
-const buildArticulacao = (tree: any): Articulacao => {
-  const articulacao = createArticulacao();
+const buildTextoEpigrafeFromDocument = (documentoLexml: any): string => {
+  const doc = documentoLexml.value.projetoNorma.norma || documentoLexml.value.projetoNorma.projeto;
+  const textoEpigrafe = doc.parteInicial?.epigrafe.content[0];
+
+  return textoEpigrafe ? textoEpigrafe : buildTextoEpigrafe(getUrn(documentoLexml));
+};
+
+const buildTextoEpigrafe = (urn: string): string => {
+  const tipo = getTipoDocumentoUrn(urn);
+  return tipo ? `${tipo.descricao.toUpperCase()} Nº , DE 2025` : '';
+};
+
+const buildArticulacao = (tree: any, textoArticulacao?: string): Articulacao => {
+  const articulacao = createArticulacao(textoArticulacao);
 
   const filhos = tree.lXhier ? (tree.lXhier.lXhier ? tree.lXhier.lXhier : tree.lXhier) : tree;
   buildTree(articulacao, filhos, []);

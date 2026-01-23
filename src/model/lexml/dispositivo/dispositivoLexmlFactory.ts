@@ -170,8 +170,11 @@ const create = (name: string, parent: Dispositivo): Dispositivo => {
   return dispositivo;
 };
 
-export const createArticulacao = (): Articulacao => {
+export const createArticulacao = (texto?: string): Articulacao => {
   const articulacao = new ArticulacaoLexml();
+
+  articulacao.texto = texto ? texto : null;
+  articulacao.bloqueado = !!texto;
   articulacao.uuid = Counter.next();
   articulacao.uuid2 = generateUUID();
   return articulacao;

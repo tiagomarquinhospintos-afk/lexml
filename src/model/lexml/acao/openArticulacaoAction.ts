@@ -1,4 +1,4 @@
-import { LexmlEtaParametrosEdicao } from '../../../components/lexml-emenda.component';
+import { LexmlEtaParametrosEdicao } from '../../../components/lexml-eta.component';
 
 export const ABRIR_ARTICULACAO = 'ABRIR_ARTICULACAO';
 

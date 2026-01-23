@@ -1,7 +1,7 @@
 import { PL_5008_2023 } from '../doc/pl_5008_2023';
 import { html, LitElement, TemplateResult } from 'lit';
 import { customElement, query, state } from 'lit/decorators.js';
-import { LexmlEtaConfig, LexmlEmendaComponent, LexmlEtaParametrosEdicao, Usuario } from '../../src';
+import { LexmlEtaConfig, LexmlEtaComponent, LexmlEtaParametrosEdicao, Usuario } from '../../src';
 import { RefProposicaoEmendada } from '../../src/model/emenda/emenda';
 import { COD_CIVIL_COMPLETO } from '../doc/codigocivil_completo';
 import { COD_CIVIL_PARCIAL1 } from '../doc/codigocivil_parcial1';
@@ -35,6 +35,7 @@ import { MPV_1170_2023 } from '../doc/mpv_1170_2023';
 import { MPV_1232_2024 } from '../doc/mpv_1232_2024';
 import { MPV_1170_2023_ALTERADA } from '../doc/mpv_1170_2023_alterada';
 import { PL_4_2025 } from '../doc/pl_4_2025';
+import { validarRecursivo } from './jsonValidator';
 
 const mapProjetosNormas = {
   mpv_885_2019: MPV_885_2019,
@@ -108,8 +109,8 @@ export class DemoView extends LitElement {
   @query('#projetoNorma')
   private elDocumento!: HTMLSelectElement;
 
-  @query('lexml-emenda')
-  private elLexmlEmenda!: LexmlEmendaComponent;
+  @query('lexml-eta')
+  private elLexmlEmenda!: LexmlEtaComponent;
 
   @state() modo = 'edicao';
   @state() projetoNorma: any = {};
@@ -199,6 +200,7 @@ export class DemoView extends LitElement {
             params.projetoNorma = this.projetoNorma;
             //params.autoriaPadrao = { identificacao: '6335', siglaCasaLegislativa: 'SF' };
             //params.opcoesImpressaoPadrao = { imprimirBrasao: true, textoCabecalho: 'Texto Teste Dennys', tamanhoFonte: 14 };
+            console.log('projetoNormaArquivo', params.projetoNorma);
           } else {
             params.sigla = 'PL';
             params.numero = '1';
@@ -245,6 +247,36 @@ export class DemoView extends LitElement {
     }
   }
 
+  comparar(): void {
+    const selecionaArquivoComparar = document.getElementById('compararFileUpload');
+    if (selecionaArquivoComparar !== null) {
+      selecionaArquivoComparar.click();
+    }
+  }
+
+  selecionaArquivoComparar(event: Event): void {
+    const fileInput = event.target as HTMLInputElement;
+    if (fileInput && fileInput.files) {
+      const fReader = new FileReader();
+      fReader.readAsText(fileInput.files[0]);
+      fReader.onloadend = async (e): Promise<void> => {
+        if (e.target?.result) {
+          const projetoNormaBase = this.elDocumento.value.indexOf('sem_texto') >= 0 ? null : { ...mapProjetosNormas[this.elDocumento.value] };
+
+          const proposicao = JSON.parse(e.target.result as string);
+          const projetoNormaArquivo = proposicao.projetoNorma;
+
+          console.log('projetoNormaBase', projetoNormaBase);
+          console.log('projetoNormaArquivo', projetoNormaArquivo);
+
+          const erros = [];
+          validarRecursivo(erros, projetoNormaBase, projetoNormaArquivo, 'raiz');
+          console.log('erros', erros);
+        }
+      };
+    }
+  }
+
   selecionaArquivo(event: Event): void {
     const fileInput = event.target as HTMLInputElement;
     if (fileInput && fileInput.files) {
@@ -255,6 +287,8 @@ export class DemoView extends LitElement {
           this.modo = 'edicao';
           const proposicao = JSON.parse(e.target.result as string);
           this.projetoNorma = proposicao.projetoNorma;
+
+          console.log('projetoNormaArquivo', this.projetoNorma);
 
           const params = new LexmlEtaParametrosEdicao();
           params.projetoNorma = this.projetoNorma;
@@ -339,11 +373,11 @@ export class DemoView extends LitElement {
           width: 4rem;
           height: 1.5rem;
         }
-        lexml-emenda {
+        lexml-eta {
           display: none;
           outline: 0;
           border: 0;
-          -webkit-box-shadow: 0px;
+          -webkit-box-shadow: none;
           box-shadow: none;
           height: calc(100vh - 100px);
         }
@@ -367,15 +401,17 @@ export class DemoView extends LitElement {
           <input type="button" value="Salvar" @click=${this.salvar} />
           <input type="button" value="Abrir" @click=${this.abrir} />
           <input type="button" value="Usuário" @click=${this.usuario} />
+          <input type="button" value="Comparar" @click=${this.comparar} />
+          <input type="file" id="compararFileUpload" accept="application/json" @change="${this.selecionaArquivoComparar}" style="display: none" />
           <input type="file" id="fileUpload" accept="application/json" @change="${this.selecionaArquivo}" style="display: none" />
         </div>
 
         <div class="lexml-eta-main-header--selecao">
           <select id="projetoNorma" @change=${this.onChangeDocumento}>
-            <option value="novo">Nova articulação</option>
+            <option value="novo" selected>Nova articulação</option>
             ${Object.keys(mapProjetosNormas)
               .filter(k => !k.startsWith('_'))
-              .map(k => html`<option value="${k}" ?selected=${k === 'plp_197_2023'}>${k.toUpperCase().replace(/_/, ' ').replace(/_/, ', de ')}</option>`)}
+              .map(k => html`<option value="${k}">${k.toUpperCase().replace(/_/, ' ').replace(/_/, ', de ')}</option>`)}
             <option value="_codcivil_completo">Código Civil Completo</option>
             <option value="_codcivil_parcial1">Código Civil (arts. 1 a 1023)</option>
             <option value="_codcivil_parcial2">Código Civil (arts. 1 a 388)</option>
@@ -390,7 +426,7 @@ export class DemoView extends LitElement {
         </div>
       </div>
       <div class="nome-proposicao">${this.proposicaoCorrente.sigla ? `${this.proposicaoCorrente.sigla} ${this.proposicaoCorrente.numero}/${this.proposicaoCorrente.ano}` : ''}</div>
-      <lexml-emenda .lexmlEmendaConfig=${this.emendaConfig} modo=${this.modo} @onrevisao=${this.onRevisao}></lexml-emenda>
+      <lexml-eta .lexmlEmendaConfig=${this.emendaConfig} modo=${this.modo} @onrevisao=${this.onRevisao}></lexml-eta>
     `;
   }
 

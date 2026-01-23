@@ -15,7 +15,7 @@ import { shoelaceLightThemeStyles } from '../assets/css/shoelace.theme.light.css
 import { adicionarAlerta } from '../model/alerta/acao/adicionarAlerta';
 import { removerAlerta } from '../model/alerta/acao/removerAlerta';
 import { Autoria, ColegiadoApreciador, Emenda, Epigrafe, Parlamentar, OpcoesImpressao } from '../model/emenda/emenda';
-import { buildFakeUrn, getAno, getNumero, getSigla, getTipo } from '../model/lexml/documento/urnUtil';
+import { buildFakeUrn, getAno, getNumero, getSigla } from '../model/lexml/documento/urnUtil';
 import { rootStore } from '../redux/store';
 import { ProjetoNorma } from './../model/lexml/documento/projetoNorma';
 import { LexmlEtaProposicaoComponent } from './lexml-eta-proposicao.component';
@@ -28,9 +28,7 @@ import { ativarDesativarRevisaoAction } from '../model/lexml/acao/ativarDesativa
 import { StateEvent, StateType } from '../redux/state';
 import { limparRevisaoAction } from '../model/lexml/acao/limparRevisoes';
 import { buildContent, getUrn } from '../model/lexml/documento/conversor/buildProjetoNormaFromJsonix';
-import { generoFromLetra } from '../model/dispositivo/genero';
 import { Comissao } from './destino/comissao';
-import { SubstituicaoTermoComponent } from './substituicao-termo/substituicao-termo.component';
 import { NOTA_RODAPE_CHANGE_EVENT, NOTA_RODAPE_REMOVE_EVENT, NotaRodape } from './editor-texto-rico/notaRodape';
 import { unsafeHTML } from 'lit-html/directives/unsafe-html.js';
 import { DestinoComponent } from './destino/destino.component';
@@ -90,8 +88,8 @@ export class LexmlEtaParametrosEdicao {
   casaLegislativa?: TipoCasaLegislativa;
 }
 
-@customElement('lexml-emenda')
-export class LexmlEmendaComponent extends connect(rootStore)(LitElement) {
+@customElement('lexml-eta')
+export class LexmlEtaComponent extends connect(rootStore)(LitElement) {
   @property({ type: Boolean }) existeObserverEmenda = false;
   @property({ type: Number }) totalAlertas = 0;
   @property({ type: Boolean }) exibirAjuda = true;
@@ -122,12 +120,8 @@ export class LexmlEmendaComponent extends connect(rootStore)(LitElement) {
   @state()
   autoria = new Autoria();
 
-  @query('lexml-substituicao-termo')
-  _substituicaoTermo?: SubstituicaoTermoComponent;
   @query('lexml-eta-proposicao')
   _lexmlEta?: LexmlEtaProposicaoComponent;
-  @query('#editor-texto-rico-emenda')
-  _lexmlEmendaTextoRico;
   @query('#editor-texto-rico-justificativa')
   _lexmlJustificativa;
   @query('lexml-destino')
@@ -221,8 +215,6 @@ export class LexmlEmendaComponent extends connect(rootStore)(LitElement) {
 
     this.projetoNorma = this._lexmlEta?.getProjetoAtualizado();
 
-    console.log('this.projetoNorma', this.projetoNorma);
-
     const proposicao = this.montarProposicaoPorUrn(this.urn);
     proposicao.dataUltimaModificacao = this._lexmlData.data || undefined;
     proposicao.projetoNorma = this.projetoNorma;
@@ -235,24 +227,19 @@ export class LexmlEmendaComponent extends connect(rootStore)(LitElement) {
     proposicao.revisoes = this.getRevisoes();
     proposicao.justificativaAntesRevisao = this._lexmlJustificativa.textoAntesRevisao;
     proposicao.pendenciasPreenchimento = this.getPendenciasPreenchimentoEmenda(proposicao);
-    proposicao.epigrafe = this.getEpigrafe(proposicao.colegiadoApreciador, proposicao.urn);
+    proposicao.epigrafe = this.getEpigrafe(this.projetoNorma);
 
     proposicao.colegiadoApreciador = this._lexmlDestino!.colegiadoApreciador;
+    proposicao.anexos = this._lexmlEta!.getAnexos();
     if (proposicao.colegiadoApreciador) proposicao.local = this.montarLocalFromColegiadoApreciador(proposicao.colegiadoApreciador);
 
     return proposicao;
   }
 
-  getEpigrafe(colegiadoApreciador: ColegiadoApreciador, urn: string): Epigrafe {
+  getEpigrafe(projetoNorma: any): Epigrafe {
     const epigrafe = new Epigrafe();
-    epigrafe.texto =
-      'EMENDA Nº         ' +
-      (colegiadoApreciador && colegiadoApreciador.tipoColegiado !== 'Plenário' && colegiadoApreciador.siglaComissao ? `- ${colegiadoApreciador.siglaComissao}` : '');
-
-    const generoProposicao = generoFromLetra(getTipo(urn).genero);
-    const inicioEpigrafe = this.emendarTextoSubstitutivo ? '(ao substitutivo ' : '(';
-
-    epigrafe.complemento = `${inicioEpigrafe}${generoProposicao.artigoDefinidoPrecedidoPreposicaoASingular.trim()} ${getSigla(urn)} ${getNumero(urn)}/${getAno(urn)})`;
+    const doc = projetoNorma.value.projetoNorma.norma || projetoNorma.value.projetoNorma.projeto;
+    epigrafe.texto = doc.parteInicial?.epigrafe.content[0];
 
     return epigrafe;
   }
@@ -320,7 +307,7 @@ export class LexmlEmendaComponent extends connect(rootStore)(LitElement) {
         this.desativarMarcaRevisao();
       }
 
-      this._tabsEsquerda.show('lexml-eta-proposicao');
+      this._tabsEsquerda.show('lexml-eta');
 
       setTimeout(() => {
         this._tabsDireita?.show('notas');
@@ -419,6 +406,7 @@ export class LexmlEmendaComponent extends connect(rootStore)(LitElement) {
     this._lexmlJustificativa.setContent(proposicao.justificativa, proposicao.notasRodape);
     this._lexmlData.data = proposicao.dataUltimaModificacao;
     this._lexmlEta!.setDispositivosERevisoesEmenda(proposicao.revisoes);
+    this._lexmlEta!.atualizaAnexos(proposicao.anexos || []);
   }
 
   private resetaProposicao(params: LexmlEtaParametrosEdicao): void {
@@ -574,7 +562,7 @@ export class LexmlEmendaComponent extends connect(rootStore)(LitElement) {
     const getElement = (selector: string): HTMLElement => document.querySelector(selector) as HTMLElement;
 
     const justificativaTabPanel = getElement('sl-tab-panel[name="justificativa"]');
-    const emendaTabPanel = getElement('sl-tab-panel[name="lexml-eta-emenda"]');
+    const proposicaoTabPanel = getElement('sl-tab-panel[name="lexml-eta-proposicao"]');
     const qlToolbarJustificativa = getElement('#editor-texto-rico-justificativa .ql-toolbar');
     const qlToolbarEmenda = getElement('#lx-eta-barra-ferramenta');
 
@@ -584,10 +572,10 @@ export class LexmlEmendaComponent extends connect(rootStore)(LitElement) {
         opacity: justificativaTabPanel.style.opacity,
         pointerEvents: justificativaTabPanel.style.pointerEvents,
       },
-      emenda: {
-        display: emendaTabPanel.style.display,
-        opacity: emendaTabPanel.style.opacity,
-        pointerEvents: emendaTabPanel.style.pointerEvents,
+      proposicao: {
+        display: proposicaoTabPanel.style.display,
+        opacity: proposicaoTabPanel.style.opacity,
+        pointerEvents: proposicaoTabPanel.style.pointerEvents,
       },
     };
 
@@ -606,15 +594,15 @@ export class LexmlEmendaComponent extends connect(rootStore)(LitElement) {
     if (estilosOriginais.justificativa.display === 'none') {
       setTabPanelStyles(justificativaTabPanel, estilosOriginais.justificativa, true);
     }
-    if (estilosOriginais.emenda.display === 'none') {
-      setTabPanelStyles(emendaTabPanel, estilosOriginais.emenda, true);
+    if (estilosOriginais.proposicao.display === 'none') {
+      setTabPanelStyles(proposicaoTabPanel, estilosOriginais.proposicao, true);
     }
 
     const alturaToolBarJustificativa = qlToolbarJustificativa?.clientHeight + 10;
     const alturaToolBarEmenda = qlToolbarEmenda?.clientHeight + 10;
 
     setTabPanelStyles(justificativaTabPanel, estilosOriginais.justificativa);
-    setTabPanelStyles(emendaTabPanel, estilosOriginais.emenda);
+    setTabPanelStyles(proposicaoTabPanel, estilosOriginais.proposicao);
 
     this.style.setProperty('--heightJustificativa', `${alturaElemento - alturaToolBarJustificativa}px`);
     this.style.setProperty('--heightEmenda', `${alturaElemento - alturaToolBarEmenda}px`);
@@ -629,7 +617,9 @@ export class LexmlEmendaComponent extends connect(rootStore)(LitElement) {
   }
 
   buildAlertaJustificativa(): void {
-    if (!this._lexmlJustificativa.isEditorVazio()) {
+    if (this._lexmlJustificativa.isEditorVazio()) {
+      this.disparaAlerta();
+    } else {
       rootStore.dispatch(removerAlerta('alerta-global-justificativa'));
     }
   }
@@ -691,7 +681,7 @@ export class LexmlEmendaComponent extends connect(rootStore)(LitElement) {
         sl-tab-panel.overflow-hidden::part(base) {
           overflow-y: auto;
         }
-        lexml-eta-emenda {
+        lexml-eta-proposicao {
           font-family: var(--eta-font-serif);
           text-align: left;
         }
@@ -699,15 +689,6 @@ export class LexmlEmendaComponent extends connect(rootStore)(LitElement) {
           height: calc(var(--height) - 44px);
           overflow: var(--overflow);
         } */
-
-        #editor-texto-rico-emenda-inner {
-          height: calc(var(--heightJustificativa));
-          overflow: var(--overflow);
-        }
-        #editor-texto-rico-justificativa-inner {
-          height: calc(var(--heightJustificativa));
-          overflow: var(--overflow);
-        }
         .badge-pulse {
           margin-left: 7px;
           height: 16px;
@@ -835,14 +816,14 @@ export class LexmlEmendaComponent extends connect(rootStore)(LitElement) {
         <sl-icon slot="handle" name="grip-vertical"></sl-icon>
         <div slot="start">
           <sl-tab-group id="tabs-esquerda">
-            <sl-tab slot="nav" panel="lexml-eta-emenda">Texto</sl-tab>
+            <sl-tab slot="nav" panel="lexml-eta-proposicao">Texto</sl-tab>
             <sl-tab slot="nav" panel="justificativa">Justificação</sl-tab>
             <sl-tab slot="nav" panel="autoria">Destino, Data, Autoria e Impressão</sl-tab>
             <sl-tab slot="nav" panel="avisos">
               Avisos
               <div class="badge-pulse" id="contadorAvisos">${this.totalAlertas > 0 ? html` <sl-badge variant="danger" pill pulse>${this.totalAlertas}</sl-badge> ` : ''}</div>
             </sl-tab>
-            <sl-tab-panel name="lexml-eta-emenda" class="overflow-hidden">
+            <sl-tab-panel name="lexml-eta-proposicao" class="overflow-hidden">
               <lexml-eta-proposicao style="display: block}" id="lexmlEta" .lexmlEtaConfig=${this.lexmlEmendaConfig} @onchange=${this.onChange}></lexml-eta-proposicao>
             </sl-tab-panel>
             <sl-tab-panel name="justificativa" class="overflow-hidden">

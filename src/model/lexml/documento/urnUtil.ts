@@ -175,3 +175,9 @@ export const getGeneroUrnNorma = (urn: string): Genero => {
   const tipo = getTipo(urn);
   return generoFromLetra(tipo.genero);
 };
+
+export const getTipoDocumentoUrn = (urn: string): any => {
+  if (!urn) return undefined;
+  const partes = urn.replace('urn:lex:br:', '')?.split(':');
+  return VOCABULARIO.tiposDocumento.find(t => t.urn === partes[1]);
+};

@@ -11,6 +11,7 @@ export const buildHref = (dispositivo: Dispositivo): string | undefined => {
   }
 
   if (dispositivo.tagId) {
+    /* eslint-disable prettier/prettier */
     return (
       dispositivo.tagId +
       (isCaput(dispositivo)
@@ -23,6 +24,7 @@ export const buildHref = (dispositivo: Dispositivo): string | undefined => {
           : dispositivo.numero!
         : `[sn:${dispositivo.uuid}]`)
     );
+    /* eslint-enable prettier/prettier */
   }
 
   return undefined;

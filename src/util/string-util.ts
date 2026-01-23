@@ -22,6 +22,10 @@ export function isValidHtmlParagraph(html: string): boolean {
   return isHTMLParagraph(html) && isValidHTML(html);
 }
 
+export function isValidText(text: string | undefined): boolean {
+  return text !== undefined && text.trim() !== '';
+}
+
 export function getTextoSemHtml(html: string): string {
   return removeEspacosDuplicados(html.replace(/(<([^>]+)>)/gi, '').trim());
 }
@@ -88,10 +92,14 @@ export const removeAllHtmlTagsExcept = (texto: string, tags: string[]): string =
 };
 
 export function isHtmlSemTexto(html: string | undefined): boolean {
-  if(!html) {
+  if (!html) {
     return true;
   }
-  return removeAllHtmlTags(html).replace(/&nbsp;/g, '').trim() === '';
+  return (
+    removeAllHtmlTags(html)
+      .replace(/&nbsp;/g, '')
+      .trim() === ''
+  );
 }
 
 export class StringBuilder {
